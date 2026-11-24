@@ -6,7 +6,7 @@ const {tmpdir}=require('node:os');
 const {prepareRelease,hashFile}=require('../scripts/prepare-release.cjs');
 async function fixture(root){
   const source=join(root,'artifacts');await mkdir(source);
-  for(const [dir,suffixes]of [['windows',['win-x64.exe']],['linux',['linux-x86_64.AppImage','linux-amd64.deb']],['intel',['mac-x64.zip','mac-x64.dmg']],['arm',['mac-arm64.zip','mac-arm64.dmg']]]){
+  for(const [dir,suffixes]of [['windows',['win-x64.exe']],['linux',['linux-x86_64.AppImage','linux-amd64.deb']],['intel',['mac-x64.zip','mac-x64.dmg']],['arm',['mac-arm64.zip','mac-arm64.dmg']],['android',['android.apk']]]){
     await mkdir(join(source,dir));for(const suffix of suffixes)await writeFile(join(source,dir,`Flusiva-0.4.0-${suffix}`),`fixture ${suffix}`);
     if(['intel','arm'].includes(dir))await writeFile(join(source,dir,'latest-mac.yml'),'duplicate builder metadata');
   }return source;

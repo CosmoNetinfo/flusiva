@@ -95,9 +95,83 @@ jobs:
             release/latest*.yml
           if-no-files-found: error
           retention-days: 14
+  android:
+    needs: test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: android-actions/setup-android@v3
+      - name: Install Android build tools and C++ runtime
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.0.12077973'
+      - name: Prepare verified Android engine
+        run: node scripts/prepare-android.mjs
+      - name: Build Android and run unit tests and lint
+        run: |
+          chmod +x android/gradlew
+          android/gradlew -p android :app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest :app:lintDebug --console=plain
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Test app and native tools on Android
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          profile: pixel_7
+          disable-animations: true
+          script: bash scripts/android-device-check.sh
+      - name: Build signed Android release
+        env:
+          KEYSTORE_BASE64: ${{ secrets.FLUSIVA_ANDROID_KEYSTORE_BASE64 }}
+          FLUSIVA_ANDROID_STORE_PASSWORD: ${{ secrets.FLUSIVA_ANDROID_STORE_PASSWORD }}
+          FLUSIVA_ANDROID_KEY_PASSWORD: ${{ secrets.FLUSIVA_ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            if [[ "$GITHUB_REF" == refs/tags/v* ]]; then echo 'Firma Android mancante: non pubblico APK non firmati.'; exit 1; fi
+            exit 0
+          fi
+          export FLUSIVA_ANDROID_KEYSTORE="$RUNNER_TEMP/flusiva-android.jks"
+          trap 'rm -f "$FLUSIVA_ANDROID_KEYSTORE"' EXIT
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$FLUSIVA_ANDROID_KEYSTORE"
+          android/gradlew -p android :app:assembleRelease --console=plain
+          mkdir -p android-installers
+          version=$(node -p "require('./package.json').version")
+          cp android/app/build/outputs/apk/release/app-release.apk "android-installers/Flusiva-$version-android.apk"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "android-installers/Flusiva-$version-android.apk"
+      - name: Collect Android screenshots
+        if: always()
+        run: |
+          mkdir -p android-test-results
+          adb pull /sdcard/Android/data/info.cosmonet.flusiva/files/screenshots android-test-results/ || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Android-test-results
+          path: |
+            android/app/build/reports/
+            android/app/build/outputs/androidTest-results/
+            android-test-results/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Flusiva-android
+          path: android-installers/*.apk
+          if-no-files-found: error
+          retention-days: 14
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: build
+    needs: [build, android]
     runs-on: ubuntu-24.04
     permissions:
       contents: write

@@ -10,3 +10,13 @@ test-results/
 .env
 build-artifacts/
 installers/
+vendor-android/
+vendor-android-jni/
+android-test-results/
+android-installers/
+android/.gradle/
+android/.kotlin/
+android/**/build/
+android/local.properties
+*.jks
+*.keystore

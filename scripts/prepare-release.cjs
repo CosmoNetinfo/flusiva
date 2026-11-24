@@ -8,6 +8,7 @@ async function prepareRelease({sourceDirectory,outputDirectory,version,releaseDa
   const source=resolve(sourceDirectory),output=resolve(outputDirectory);
   if(output===source||output.startsWith(source+require('node:path').sep))throw new Error('La destinazione deve essere esterna agli artifact.');
   const names=[`Flusiva-${version}-win-x64.exe`,`Flusiva-${version}-linux-x86_64.AppImage`,`Flusiva-${version}-linux-amd64.deb`,`Flusiva-${version}-mac-x64.zip`,`Flusiva-${version}-mac-arm64.zip`,`Flusiva-${version}-mac-x64.dmg`,`Flusiva-${version}-mac-arm64.dmg`];
+  names.push(`Flusiva-${version}-android.apk`);
   const allowed=new Set([...names,...names.map(name=>name+'.blockmap')]);const files=new Map();
   async function walk(directory){for(const entry of await readdir(directory,{withFileTypes:true})){if(entry.isSymbolicLink())throw new Error('Un artifact contiene un link simbolico.');const file=join(directory,entry.name);if(entry.isDirectory())await walk(file);else if(allowed.has(entry.name)){const size=(await stat(file)).size;if(!size)throw new Error('Artifact vuoto.');const sha512=await hashFile(file,'sha512','base64');const previous=files.get(entry.name);if(previous&&previous.sha512!==sha512)throw new Error('Artifact diversi con lo stesso nome.');files.set(entry.name,{file,url:basename(file),size,sha512});}}}
   await walk(source);for(const name of names)if(!files.has(name))throw new Error(`Artifact mancante: ${name}`);
