@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.0 — 2026-11-24
+## 0.4.1 — 2026-11-24
 
 * Aggiornamenti automatici con electron-updater: controllo all’avvio e ogni 6 ore, download verificato SHA-512 e avanzamento.
 * Windows e AppImage: installazione al riavvio richiesto o alla chiusura normale quando non ci sono lavori pendenti. Debian: installazione esplicita con autorizzazione del sistema.

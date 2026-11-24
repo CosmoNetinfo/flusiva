@@ -19,7 +19,7 @@ Gli installer sono nella sezione [Releases](https://github.com/CosmoNetinfo/flus
 | macOS Intel | `.dmg` / `.zip` con `x64` nel nome |
 | macOS Apple Silicon | `.dmg` / `.zip` con `arm64` nel nome |
 
-Le prime build non sono firmate né notarizzate. Windows e macOS possono mostrare avvisi sull'editore. Una distribuzione con firma richiede certificati del proprietario. **Da 0.3 o precedenti occorre installare manualmente la 0.4 una volta:** il sistema di aggiornamento è incluso dalla 0.4. Gli aggiornamenti includono anche gli strumenti distribuiti con l’app.
+Le prime build non sono firmate né notarizzate. Windows e macOS possono mostrare avvisi sull'editore. Una distribuzione con firma richiede certificati del proprietario. **Da 0.3 o precedenti occorre installare manualmente la 0.4.1 una volta:** il sistema di aggiornamento è incluso dalla 0.4. Gli aggiornamenti includono anche gli strumenti distribuiti con l’app.
 
 Su Windows eseguire l’installer e scegliere la cartella. Su macOS aprire il DMG e trascinare Flusiva in Applicazioni; selezionare la variante adatta in **Informazioni su questo Mac**. Le build sono separate: `arm64` per chip Apple, `x64` per Intel. Verificare l’origine dalla repository ufficiale e il checksum della release prima di autorizzare un’app non firmata. Requisiti macOS ed Electron: [supporto delle piattaforme](https://www.electronjs.org/docs/latest/tutorial/support#supported-platforms).
 
@@ -139,8 +139,8 @@ Compilare sul sistema di destinazione. GitHub Actions esegue automaticamente i c
 Per pubblicare gli installer creare e inviare un tag coerente con `package.json`:
 
 ```sh
-git tag v0.4.0
-git push origin v0.4.0
+git tag v0.4.1
+git push origin v0.4.1
 ```
 
 Il workflow pubblica una GitHub Release solo quando tutte e quattro le build riescono. Prepara i feed Windows/Linux/macOS con SHA-512 e unisce le architetture Mac. Carica tutti i file in una bozza e la pubblica solo al termine. Include `SHA256SUMS.txt`. Nessun workflow Pages è necessario.

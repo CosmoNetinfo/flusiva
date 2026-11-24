@@ -10,11 +10,13 @@ function isDeveloperIdSigned(execPath){
 }
 function createDesktopUpdater({app,getPreferences,isBusy,onChange,disabled=false}){
   let packageType=process.env.APPIMAGE?'AppImage':null;
-  if(process.platform==='linux'&&existsSync(join(process.resourcesPath,'package-type')))packageType=readFileSync(join(process.resourcesPath,'package-type'),'utf8').trim();
+  if(process.platform==='linux'&&!process.env.APPIMAGE&&existsSync(join(process.resourcesPath,'package-type')))packageType=readFileSync(join(process.resourcesPath,'package-type'),'utf8').trim();
   const capability=updateCapability({isPackaged:app.isPackaged&&!disabled,platform:process.platform,packageType,macSigned:app.isPackaged&&!disabled&&process.platform==='darwin'?isDeveloperIdSigned(process.execPath):false});
   let updater=null;
   if(capability.mode==='native'){
-    updater=require('electron-updater').autoUpdater;
+    const native=require('electron-updater');
+    // APPIMAGE is authoritative even if a combined Linux build also left a Debian marker.
+    updater=process.platform==='linux'?(packageType==='AppImage'?new native.AppImageUpdater():new native.DebUpdater()):native.autoUpdater;
     updater.setFeedURL({provider:'github',owner:'CosmoNetinfo',repo:'flusiva',private:false,releaseType:'release'});
   }
   return createAutoUpdateService({currentVersion:app.getVersion(),capability,updater,getPreferences,isBusy,onChange});

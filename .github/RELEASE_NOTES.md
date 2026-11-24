@@ -1,4 +1,4 @@
-**Flusiva 0.4.0** implementa gli aggiornamenti dell’app: controllo, download verificato e installazione. Download multimediali e conversioni continuano a svolgersi sul computer, senza account o server Flusiva. Codice GPL-3.0-only.
+**Flusiva 0.4.1** implementa gli aggiornamenti dell’app: controllo, download verificato e installazione. Download multimediali e conversioni continuano a svolgersi sul computer, senza account o server Flusiva. Codice GPL-3.0-only.
 
 ### Aggiornamenti automatici
 

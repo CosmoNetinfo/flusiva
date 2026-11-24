@@ -68,7 +68,12 @@ jobs:
         if: runner.os != 'macOS'
       - name: Build macOS (Developer ID when configured)
         if: runner.os == 'macOS'
-        run: npm run dist -- ${{ matrix.target }}
+        shell: bash
+        run: |
+          if [ -z "$CSC_LINK" ]; then
+            unset CSC_LINK CSC_KEY_PASSWORD APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID
+          fi
+          npm run dist -- ${{ matrix.target }}
         env:
           CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}

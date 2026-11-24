@@ -1,6 +1,6 @@
 # Verifiche della prima versione
 
-## Estensione 0.4.0
+## Estensione 0.4.1
 
 * 41 test deterministici superati: 8 nuovi controlli per capacità dei sistemi, download automatico/manuale, verifica fallita, deduplicazione richieste, blocco con coda attiva, Debian e fallback Mac non firmato.
 * Preparazione feed verificata con checksum dei file effettivi, entrambe le architetture Mac e selezione architettura della classe reale MacUpdater.
