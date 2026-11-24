@@ -2,6 +2,11 @@
 const api = window.flusiva;
 const $ = id => document.getElementById(id);
 let video = null, format = 'mp4', busy = false, cancelled = false;
+let preferences={defaultFormat:'mp4',videoQuality:'best',audioQuality:'320',askWhereToSave:true};
+document.addEventListener('flusiva:preferences',event=>{
+  preferences=event.detail;
+  if(!busy){format=video?.hasVideo===false?'mp3':preferences.defaultFormat;updateFormat();}
+});
 const setText = (id, text) => { $(id).textContent = text; };
 function showError(message) { setText('url-error',message); $('url-error').hidden = false; $('video-url').setAttribute('aria-invalid','true'); }
 function clearError() { $('url-error').hidden = true; $('video-url').removeAttribute('aria-invalid'); }
@@ -9,17 +14,20 @@ function setBusy(value) {
   busy = value;
   ['video-url','paste-button','inspect-button','quality'].forEach(id => { $(id).disabled = value; });
   document.querySelectorAll('[data-format]').forEach(button => { button.disabled = value; });
-  $('download-button').disabled = value || !video || (format === 'mp4' && !video.heights.length) || (format === 'mp3' && !video.hasAudio);
+  $('download-button').disabled = value || !video || (format === 'mp4' && !video.hasVideo) || (format === 'mp3' && !video.hasAudio);
+  document.querySelector('[data-format="mp4"]').disabled=value||video?.hasVideo===false;
 }
 function updateFormat() {
   document.querySelectorAll('[data-format]').forEach(button => { const selected = button.dataset.format === format; button.classList.toggle('selected',selected); button.setAttribute('aria-pressed',String(selected)); });
   document.querySelector('label[for="quality"]').textContent = format === 'mp4' ? 'Qualità del video' : 'Qualità dell’audio';
   setText('quality-note',format === 'mp4' ? 'La risoluzione dipende dal video originale.' : 'La conversione non migliora l’audio originale.');
   $('quality').replaceChildren();
-  const choices = format === 'mp3' ? [['320','320 kbps'],['256','256 kbps'],['192','192 kbps'],['128','128 kbps']] : [['best','Migliore disponibile'],...(video?.heights || []).filter(height => [4320,2160,1440,1080,720,480,360,240,144].includes(height)).map(height => [String(height),`${height}p${height === 2160 ? ' · 4K' : height === 4320 ? ' · 8K' : ''}`])];
+  const choices = format === 'mp3' ? [['320','320 kbps'],['256','256 kbps'],['192','192 kbps'],['128','128 kbps']] : [['best','Migliore disponibile'],...[4320,2160,1440,1080,720,480,360,240,144].filter(height=>!video||(height<=Math.max(...video.heights,0)&&video.heights.some(available=>available<=height))).map(height => [String(height),`${height}p${height === 2160 ? ' · 4K' : height === 4320 ? ' · 8K' : ''}`])];
   choices.forEach(([value,label]) => $('quality').add(new Option(label,value)));
+  const preferred=format==='mp3'?preferences.audioQuality:preferences.videoQuality;
+  if(choices.some(([value])=>value===preferred))$('quality').value=preferred;
   document.querySelector('#download-button span').textContent = format === 'mp4' ? 'Scarica il video' : 'Scarica l’audio';
-  setText('download-hint',!video ? 'Analizza un link per iniziare il download.' : format === 'mp4' && !video.heights.length ? 'Questo video non offre un formato MP4 disponibile.' : format === 'mp3' && !video.hasAudio ? 'Questo video non offre una traccia audio disponibile.' : 'Sceglierai dove salvare il file sul computer.');
+  setText('download-hint',!video?'Analizza un link per iniziare il download.':format==='mp4'&&!video.hasVideo?'Questo contenuto è solo audio. Scegli MP3.':format==='mp3'&&!video.hasAudio?'Questo contenuto non ha una traccia audio.':preferences.askWhereToSave?'Sceglierai dove salvare il file sul computer.':'Il file sarà salvato nella cartella delle Impostazioni.');
   setBusy(busy);
 }
 function result(title,message,failed = false) {
@@ -40,17 +48,18 @@ $('link-form').addEventListener('submit',async event => {
   setText('inspect-button','Analisi in corso…');
   $('progress-panel').hidden = false; $('download-progress').removeAttribute('value');
   setText('progress-label','Recupero delle informazioni…');
-  setText('progress-note','Connessione a YouTube dal tuo computer.');
+  setText('progress-note','Connessione alla piattaforma dal tuo computer.');
   try {
     video = await invoke('inspect',$('video-url').value);
-    setText('video-title',video.title); setText('video-channel',video.channel);
+    setText('video-title',video.title); setText('video-channel',`${video.platformName} · ${video.channel}`);
+    if(!video.hasVideo)format='mp3';else if(!video.hasAudio)format='mp4';
     const seconds = Math.floor(video.duration); const hours = Math.floor(seconds / 3600);
     setText('video-duration',`${hours ? `${hours}:` : ''}${String(Math.floor(seconds / 60) % 60).padStart(hours ? 2 : 1,'0')}:${String(seconds % 60).padStart(2,'0')}`);
-    $('thumbnail').src = video.thumbnail; $('video-preview').hidden = false;
+    $('thumbnail').src = video.thumbnail||'./mark.svg'; $('video-preview').hidden = false;
   } catch (error) { showError(error.message); }
   finally { $('progress-panel').hidden = true; setText('inspect-button','Analizza il link'); setBusy(false); updateFormat(); }
 });
-$('video-url').addEventListener('input',() => { clearError(); video = null; $('video-preview').hidden = true; $('result').hidden = true; updateFormat(); });
+$('video-url').addEventListener('input',() => { clearError(); video = null; format=preferences.defaultFormat; $('video-preview').hidden = true; $('result').hidden = true; updateFormat(); });
 $('paste-button').addEventListener('click',async () => {
   try { $('video-url').value = await invoke('paste'); $('video-url').dispatchEvent(new Event('input')); $('video-url').focus(); }
   catch (error) { showError(error.message); }
@@ -60,7 +69,7 @@ $('download-button').addEventListener('click',async () => {
   if (!video || busy) return;
   clearError(); setBusy(true); cancelled = false; $('result').hidden = true;
   $('progress-panel').hidden = false; $('download-progress').removeAttribute('value');
-  setText('progress-label','Scegli dove salvare il file…'); setText('progress-note','Il download inizierà dopo la scelta della cartella.');
+  setText('progress-label',preferences.askWhereToSave?'Scegli dove salvare il file…':'Preparazione del download…'); setText('progress-note',preferences.askWhereToSave?'Il download inizierà dopo la scelta della cartella.':'Il file sarà salvato nella tua cartella preferita.');
   try {
     const saved = await invoke('download',{ format, quality: $('quality').value });
     if (!saved.cancelled) result('Download completato',saved.path);
@@ -71,6 +80,7 @@ $('cancel-button').addEventListener('click',async () => { cancelled = true; setT
 $('reveal-button').addEventListener('click',() => invoke('reveal').catch(error => showError(error.message)));
 $('help-button').addEventListener('click',() => $('help-dialog').showModal());
 $('close-help').addEventListener('click',() => $('help-dialog').close());
+$('thumbnail').addEventListener('error',()=>{if(!$('thumbnail').src.endsWith('/mark.svg'))$('thumbnail').src='./mark.svg';});
 if (api) {
   api.onProgress(progress => {
     if (cancelled) return;

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0 — 2026-11-24
+
+* Nuovi servizi: TikTok, Vimeo, Dailymotion e SoundCloud, oltre a YouTube; solo contenuti pubblici singoli. TikTok e Vimeo possono richiedere accesso o limitare le richieste.
+* Link brevi con redirect verificati, formati comuni e gestione dei contenuti solo audio.
+* Nuova pagina Impostazioni con cartella di download, richiesta della destinazione, qualità e formato predefiniti, apertura cartella, riduzione movimento e ripristino.
+* Tema chiaro, scuro e di sistema, con preferenze salvate localmente in JSON tramite scrittura atomica.
+* Salvataggio automatico con nomi univoci, senza sovrascrivere file esistenti.
+* 19 test deterministici e test Electron esteso a navigazione e preferenze; profilo isolato per i test.
+* Verifiche online e limitazioni per piattaforma documentate in `docs/PLATFORMS.md`.
+
 ## 0.1.1 — 2026-11-24
 
 * Corretto il test CI su Linux: configura il sandbox helper con proprietario e permessi corretti.

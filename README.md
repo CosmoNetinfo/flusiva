@@ -2,7 +2,7 @@
 
 <img src="docs/brand/flusiva-wordmark.svg" alt="Flusiva" width="250">
 
-App desktop per scaricare **video MP4 e audio MP3 da YouTube**, con interfaccia in italiano. Windows, Linux e macOS (Intel e Apple Silicon). Il computer dell'utente esegue download e conversione: nessun server remoto, account, hosting o database.
+App desktop per scaricare **video MP4 e audio MP3 da YouTube, TikTok, Vimeo, Dailymotion e SoundCloud**, con interfaccia in italiano. Windows, Linux e macOS (Intel e Apple Silicon). Il computer dell'utente esegue download e conversione: nessun server remoto, account, hosting o database.
 
 ![Interfaccia desktop di Flusiva](docs/images/flusiva-desktop.png)
 
@@ -25,7 +25,7 @@ Su Linux: rendere eseguibile l'AppImage (`chmod +x Flusiva-*.AppImage`) e avviar
 
 ## Utilizzo
 
-1. Incollare il link di un singolo video YouTube e scegliere **Analizza il link**.
+1. Incollare il link di un singolo video o di una traccia e scegliere **Analizza il link**.
 2. Selezionare **Video MP4** o **Solo audio MP3** e la qualità.
 3. Premere **Scarica** e scegliere dove salvare il file.
 
@@ -33,7 +33,39 @@ Video: migliore combinazione di tracce MP4/M4A disponibile, senza ricodifica del
 
 Un download alla volta, durata massima 6 ore, limite 8 GiB per singola traccia, timeout 2 ore. I file vengono preparati nello spazio temporaneo del sistema, copiati alla destinazione e rimossi al termine, in caso di errore o annullamento. Serve spazio per tracce, file finale e copia di salvataggio. Una chiusura forzata del processo può lasciare una cartella `flusiva-*` nella directory temporanea: si può rimuovere quando l'app è chiusa.
 
-Dirette in corso/programmate, playlist, video privati e contenuti che richiedono login non sono supportati. YouTube può cambiare o bloccare le richieste: nessuna app può garantire il download di ogni video. Usare contenuti propri o autorizzati. Solo YouTube è abilitato; l'adattatore è in `core/youtube.cjs` per future piattaforme.
+Dirette in corso/programmate, playlist, video privati e contenuti che richiedono login non sono supportati. Le piattaforme possono cambiare o bloccare le richieste: nessuna app può garantire il download di ogni contenuto. Usare contenuti propri o autorizzati.
+
+## Piattaforme
+
+| Piattaforma | Link accettati | Output |
+| --- | --- | --- |
+| YouTube | Video, Shorts, YouTube Music, `youtu.be` | MP4 e MP3 |
+| TikTok | Singolo video pubblico, `vm.tiktok.com`, `vt.tiktok.com`, `tiktok.com/t/` | MP4 e MP3 |
+| Vimeo | `vimeo.com/ID` e `player.vimeo.com/video/ID` pubblici | MP4 e MP3 |
+| Dailymotion | Singolo video, embed e `dai.ly` | MP4 e MP3 |
+| SoundCloud | Singola traccia pubblica e link brevi `on.soundcloud.com` | MP3 |
+
+Per SoundCloud viene selezionato MP3 e MP4 resta disabilitato. I link brevi sono risolti con controllo di ogni redirect, della piattaforma e del numero di passaggi. Le copertine sono accettate soltanto dai CDN delle piattaforme; se non disponibili viene mostrato il simbolo Flusiva.
+
+**Disponibilità:** le prove online del 24 novembre 2026 hanno recuperato i metadati di YouTube, Dailymotion e SoundCloud. Le richieste di prova a TikTok e Vimeo sono state limitate o hanno richiesto accesso. Il codice supporta i loro contenuti pubblici, ma il funzionamento dipende da contenuto, rete e restrizioni della piattaforma. Non sono stati verificati download completi da tutte le nuove piattaforme. [Valutazione e verifiche](docs/PLATFORMS.md).
+
+## Impostazioni
+
+Aprire **Impostazioni** nella barra superiore. Le modifiche entrano in vigore con **Salva preferenze**; il tema viene mostrato in anteprima mentre lo si sceglie.
+
+* **Cartella dei download:** selettore nativo del sistema; nessun percorso deve essere digitato.
+* **Chiedi sempre dove salvare:** attivo per impostazione iniziale. Disattivandolo, l'app usa la cartella scelta e aggiunge `(1)`, `(2)` e così via ai nomi già presenti, senza sovrascriverli.
+* **Apri la cartella al termine:** facoltativo, mostra il file appena pronto.
+* **Formato e qualità predefiniti:** MP4 o MP3, risoluzione massima e bitrate MP3. Il singolo download può usare una scelta diversa.
+* **Aspetto:** tema chiaro, scuro o di sistema, con opzione per ridurre le animazioni. Viene rispettata anche la preferenza di movimento del sistema.
+* **Piattaforme e versione:** riepilogo dei formati, motore incluso e collegamento alle release ufficiali.
+* **Ripristina preferenze:** torna ai valori iniziali; non elimina i file scaricati.
+
+Le preferenze sono in `settings.json` nella cartella dati dell’app (`app.getPath('userData')`), con scrittura atomica. Nessun database o sincronizzazione online. Un file corrotto viene recuperato con valori iniziali. Le impostazioni scelte durante un download si applicano a quelli successivi.
+
+![Impostazioni, tema chiaro](docs/images/settings-light.png)
+
+![Impostazioni, tema scuro](docs/images/settings-dark.png)
 
 ## Sviluppo
 
@@ -56,13 +88,15 @@ npm run dist
 
 Test online facoltativo: `node scripts/online-smoke.cjs`. Scarica il cortometraggio Creative Commons Big Buck Bunny della Blender Foundation in MP4 a risoluzione limitata e MP3, verifica le tracce con FFprobe e rimuove i temporanei. Richiede Internet e circa 70 MB di trasferimento; un URL alternativo autorizzato può essere passato come argomento. Non fa parte della CI per evitare dipendenza da YouTube nei controlli deterministici.
 
-Compilare sul sistema di destinazione. GitHub Actions esegue automaticamente i controlli, il test d'avvio Electron e la compilazione su quattro runner nativi. I test deterministici non contattano YouTube. Prima di una release pubblica verificare un download MP4 e MP3 reale su ciascun sistema con un video autorizzato.
+Sonde dei soli metadati: `node scripts/platform-smoke.cjs`. Controlla contenuti pubblici sulle cinque piattaforme senza scaricare i file multimediali e registra esiti e restrizioni in `test-results/platform-probes.json`. Un blocco remoto viene registrato come tale, non come successo.
+
+Compilare sul sistema di destinazione. GitHub Actions esegue automaticamente i controlli, il test d'avvio Electron e la compilazione su quattro runner nativi. I 19 test deterministici non contattano i servizi esterni. Il test Electron verifica anche navigazione, preferenze via IPC, rifiuto di valori non validi, ripristino e presenza delle cinque piattaforme, con profilo isolato. Prima di una release pubblica verificare un download MP4 e MP3 reale su ciascun sistema con un video autorizzato.
 
 Per pubblicare gli installer creare e inviare un tag coerente con `package.json`:
 
 ```sh
-git tag v0.1.1
-git push origin v0.1.1
+git tag v0.2.0
+git push origin v0.2.0
 ```
 
 Il workflow pubblica una GitHub Release solo quando tutte e quattro le build riescono. Include `SHA256SUMS.txt`. Nessun workflow Pages è necessario.
@@ -71,11 +105,13 @@ Il workflow pubblica una GitHub Release solo quando tutte e quattro le build rie
 
 * `desktop/`: processo Electron e bridge IPC ristretto, renderer in sandbox con isolamento del contesto, navigazione e permessi bloccati.
 * `public/`: interfaccia locale HTML/CSS/JavaScript con CSP, senza script remoti, telemetria o server HTTP.
-* `core/`: validazione YouTube, metadati, processi senza shell, avanzamento, annullamento e pulizia dei temporanei.
+* `core/platforms.cjs`: riconoscimento dei cinque servizi, link brevi, metadati comuni e opzioni dei formati.
+* `core/settings.cjs` e `core/files.cjs`: preferenze locali validate, aggiornamenti atomici e salvataggio senza sovrascrittura.
+* `core/`: processi senza shell, avanzamento, annullamento e pulizia dei temporanei.
 * `scripts/prepare-tools.mjs`: dipendenze native e controllo di integrità.
 * `.github/workflows/build.yml`: test, installer e pubblicazione release.
 
-Le copertine sono recuperate da `i.ytimg.com`; i contenuti sono richiesti direttamente a YouTube. Nessun link viene inviato a un servizio Flusiva.
+Copertine e contenuti sono richiesti direttamente alle piattaforme e ai loro CDN. Nessun link viene inviato a un servizio Flusiva. La pagina Impostazioni non genera richieste di rete; il collegamento alle release si apre nel browser soltanto al clic.
 
 Licenze dei componenti in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
@@ -83,7 +119,7 @@ Licenze dei componenti in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 Identità in blu, azzurro e bianco, con una F costruita da puntini. [Studio del logo e tre proposte](docs/BRAND.md), [tavola ad alta risoluzione](docs/brand/logo-study.png), [roadmap e piattaforme candidate](docs/ROADMAP.md), [note di rilascio](CHANGELOG.md) e [verifiche della versione](docs/VALIDATION.md).
 
-La roadmap propone TikTok, Vimeo e SoundCloud dopo i miglioramenti di stabilità. Non sono abilitate nella release 0.1.0.
+La versione 0.2.0 implementa TikTok, Vimeo, Dailymotion e SoundCloud. La roadmap mantiene Instagram, firma digitale, aggiornamenti verificati e coda di download fra le evoluzioni future.
 
 ## Risolvere un problema
 

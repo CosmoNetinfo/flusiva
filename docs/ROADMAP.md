@@ -1,6 +1,6 @@
 # Prossime versioni di Flusiva
 
-Valutazione del 24 novembre 2026. Questa è una proposta di sviluppo: la versione 0.1.0 abilita soltanto YouTube.
+Valutazione del 24 novembre 2026, aggiornata per 0.2.0. YouTube, TikTok, Vimeo, Dailymotion e SoundCloud sono implementati. [Esiti reali e limiti delle prove](PLATFORMS.md). La pagina Impostazioni include cartella, qualità, formato, temi e preferenze di salvataggio.
 
 ## Prima di aggiungere piattaforme
 
@@ -9,7 +9,7 @@ Valutazione del 24 novembre 2026. Questa è una proposta di sviluppo: la version
 | 1 | Aggiornamento dell’app con verifica delle firme | Gli estrattori cambiano con le piattaforme | Aggiornamento verificabile, rollback e comportamento chiaro senza rete |
 | 1 | Firma Windows e firma/notarizzazione macOS | Riduce gli ostacoli all’installazione | Certificati del proprietario configurati come secret, verifica su macchine pulite |
 | 1 | Test dei download su tre sistemi | I test automatici con fixture non verificano YouTube | MP4 con audio, MP3, annullamento e disco pieno verificati su ogni OS |
-| 2 | Cartella preferita e qualità ricordata | Riduce i clic sui download successivi | Piccolo file JSON locale, senza account o database |
+| Completata in 0.2 | Cartella preferita, formato e qualità ricordati | Riduce i clic sui download successivi | File JSON locale atomico, pagina Impostazioni, temi chiaro/scuro e ripristino |
 | 2 | Coda di download e ripresa | Utile per più link e interruzioni di rete | Una conversione per volta, spazio su disco controllato, stato comprensibile |
 | 2 | Velocità e tempo stimato | Rende chiara l’attesa | Valori reali dal processo, nessuna percentuale simulata durante la conversione |
 | 3 | Formato audio originale M4A/Opus | Evita una ricodifica quando MP3 non serve | Formato e compatibilità spiegati prima del download |
@@ -27,7 +27,7 @@ yt-dlp include estrattori per TikTok, Vimeo, SoundCloud, Dailymotion e Instagram
 | 4 | Dailymotion | Un singolo video pubblico | Estensione del flusso MP4 esistente | Formati e restrizioni di accesso |
 | 5 | Instagram | Video/Reel pubblici singoli | Richiesta plausibile per i contenuti social | Login, rate limit e frequenti cambiamenti; manutenzione da valutare prima di promettere supporto |
 
-Quest’ordine è una valutazione progettuale, non una misura comparativa dell’affidabilità: le nuove piattaforme non sono state ancora provate dentro Flusiva. Nessuna promessa per contenuti privati, DRM o accessi a pagamento.
+Le prime quattro estensioni sono implementate in 0.2.0. Le sonde online hanno confermato i metadati di Dailymotion e SoundCloud; TikTok e Vimeo hanno limitato le richieste. Instagram resta una proposta. Nessuna promessa per contenuti privati, DRM o accessi a pagamento.
 
 ## Come estendere il codice
 
@@ -37,4 +37,4 @@ Per TikTok i link abbreviati richiederanno risoluzione controllata prima del dow
 
 ## Sequenza consigliata
 
-**0.1.x:** stabilità, firme, spazio su disco, qualità e UX dei download. **0.2:** TikTok pubblico dopo prove su Windows/Linux/macOS. **0.3:** Vimeo e SoundCloud. Valutare Dailymotion e Instagram dopo aver misurato il costo di manutenzione. Nessuna data promessa prima delle prove tecniche.
+**0.2:** quattro nuove piattaforme e Impostazioni implementate. **Prossimo ciclo:** più prove dei download sulle reti degli utenti, stabilità degli estrattori, firma e aggiornamenti verificati. **Poi:** coda di download e valutazione Instagram. Nessuna data promessa prima delle prove tecniche.

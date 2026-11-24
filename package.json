@@ -1,7 +1,7 @@
 {
   "name": "flusiva",
-  "version": "0.1.1",
-  "description": "Scarica video MP4 e audio MP3 da YouTube sul tuo computer.",
+  "version": "0.2.0",
+  "description": "Video MP4 e audio MP3 dalle tue piattaforme preferite, sul tuo computer.",
   "author": "CosmoNet",
   "private": true,
   "main": "desktop/main.cjs",
@@ -66,7 +66,7 @@
       "category": "AudioVideo",
       "icon": "build/icon.png",
       "maintainer": "CosmoNet",
-      "synopsis": "Video MP4 e audio MP3 da YouTube"
+      "synopsis": "Video MP4 e audio MP3 da cinque piattaforme"
     },
     "mac": {
       "target": [

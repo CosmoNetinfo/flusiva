@@ -1,5 +1,13 @@
 # Verifiche della prima versione
 
+## Estensione 0.2.0
+
+* 19 test deterministici: includono ora cinque piattaforme, redirect sicuri e limitati, immagini CDN, contenuti audio-only, preferenze persistenti dopo riapertura, aggiornamenti concorrenti, recupero da JSON corrotto e salvataggi senza sovrascrittura.
+* Test nell’app Electron reale: apertura Impostazioni, elenco delle cinque piattaforme, lettura/scrittura preferenze via IPC, valori e percorsi non autorizzati rifiutati, ripristino. Profilo temporaneo isolato dalle preferenze dell’utente.
+* Screenshot verificati dei temi chiaro e scuro e della schermata download. Salvati in `docs/images`.
+* Prove online e limitazioni documentate separatamente in [PLATFORMS.md](PLATFORMS.md): nessuna dichiarazione di download riuscito per le piattaforme bloccate.
+* La sandbox Windows locale ha impedito il rename atomico dei JSON nella propria cartella temporanea. La riesecuzione autorizzata dei test fuori da tale sandbox ha superato tutti i controlli; non è stato introdotto un salvataggio meno sicuro per aggirare il limite dell’ambiente.
+
 GATE: ERROR — i controlli della skill grafica basati su Chrome non sono partiti nell’ambiente locale (`Chrome did not start` / `Chrome exited early`). Non è un esito positivo del controllo. La verifica visiva è stata eseguita separatamente nell’app Electron reale.
 
 ## Ambiente locale Windows

@@ -37,8 +37,29 @@ test('errore di conversione e annullamento non lasciano file temporanei',async (
   try {
     for (const raw of ['conversion failed','cancelled']) {
       const downloader=createDownloader({toolsDir:'tools',tempRoot,runner:async(_exe,args)=>{await writeFile(args[args.indexOf('-o')+1].replace('%(ext)s','part'),'partial');throw new Error(raw);}});
-      await assert.rejects(downloader.download({url:'https://youtu.be/BaW_jenozKc'},'mp3','320'));
+      await assert.rejects(downloader.download({url:'https://youtu.be/BaW_jenozKc',hasAudio:true},'mp3','320'));
       assert.deepEqual(await readdir(tempRoot),[]);
     }
   } finally {await rm(tempRoot,{recursive:true,force:true});}
+});
+test('il motore trasferisce tutte le piattaforme e SoundCloud accetta solo audio',async()=>{
+  const tempRoot=await mkdtemp(join(tmpdir(),'flusiva-platform-engine-test-'));
+  try {
+    for(const [url,id,platform,format]of [
+      ['https://www.tiktok.com/@creator/video/7123456789012345678','7123456789012345678','tiktok','mp4'],
+      ['https://vimeo.com/1234567','1234567','vimeo','mp4'],
+      ['https://dai.ly/x123abc','x123abc','dailymotion','mp4'],
+      ['https://soundcloud.com/artist/track','123456','soundcloud','mp3']
+    ]) {
+      let transfers=0;
+      const downloader=createDownloader({toolsDir:'tools',tempRoot,runner:async(_exe,args)=>{
+        if(args.includes('--dump-single-json'))return JSON.stringify({id,duration:12,title:'Fixture',formats:[{ext:format==='mp3'?'m4a':'mp4',vcodec:format==='mp3'?'none':'avc1',acodec:'aac',height:format==='mp3'?undefined:720}]});
+        transfers++;await writeFile(args[args.indexOf('-o')+1].replace('%(ext)s',format),'fixture');return '';
+      }});
+      const info=await downloader.inspect(url);assert.equal(info.platform,platform);
+      if(platform==='soundcloud')await assert.rejects(downloader.download(info,'mp4','best'),/solo audio/);
+      const result=await downloader.download(info,format,format==='mp3'?'192':'best');assert.equal(transfers,1);await result.cleanup();
+    }
+    assert.deepEqual(await readdir(tempRoot),[]);
+  }finally{await rm(tempRoot,{recursive:true,force:true});}
 });

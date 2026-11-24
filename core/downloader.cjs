@@ -1,7 +1,7 @@
 const { spawn } = require('node:child_process');
 const { join } = require('node:path');
 const { mkdtemp, readdir, rm, stat } = require('node:fs/promises');
-const { normalizeUrl, summarize, downloadOptions, friendlyError } = require('./youtube.cjs');
+const { identify,resolveLink,summarize,downloadOptions,friendlyError } = require('./platforms.cjs');
 
 function stopChild(child) {
   if (!child.pid || child.exitCode !== null) return;
@@ -44,13 +44,17 @@ function createDownloader({ toolsDir, tempRoot, nodePath = process.execPath, run
   const env = { ...process.env, ELECTRON_RUN_AS_NODE: '1' };
   return {
     async inspect(value, signal) {
-      const url = normalizeUrl(value);
-      try { return summarize(JSON.parse(await runner(yt, [...common,'--dump-single-json','--skip-download','--',url], { signal, env }))); }
-      catch (error) { throw new Error(friendlyError(error.message)); }
+      const item=await resolveLink(value,{signal});
+      let info;
+      try { info=JSON.parse(await runner(yt,[...common,'--dump-single-json','--skip-download','--',item.url],{signal,env})); }
+      catch(error){throw new Error(friendlyError(error.message,item.platform));}
+      return summarize(info,item);
     },
     async download(info, format, quality, { signal, onProgress = () => {} } = {}) {
-      const url = normalizeUrl(info.url);
-      const options = downloadOptions(format, quality);
+      const item=identify(info.url);
+      if(item.short)throw new Error('Analizza prima il link completo del contenuto.');
+      const url=item.url;
+      const options = downloadOptions(format, quality,info);
       const directory = await mkdtemp(join(tempRoot, 'flusiva-'));
       try {
         await runner(yt, [...common,...options,'--newline','--progress','--progress-template','download:FLUSIVA:%(progress._percent_str)s','--max-filesize','8G','-o',join(directory,'media.%(ext)s'),'--',url], {
@@ -69,7 +73,7 @@ function createDownloader({ toolsDir, tempRoot, nodePath = process.execPath, run
         return { path: join(directory,filename), cleanup: () => rm(directory,{ recursive: true, force: true }) };
       } catch (error) {
         await rm(directory, { recursive: true, force: true });
-        throw new Error(friendlyError(error.message));
+        throw new Error(friendlyError(error.message,info.platformName||item.platform));
       }
     }
   };

@@ -3,33 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https://i.ytimg.com; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
-  <meta name="description" content="Flusiva scarica video MP4 e audio MP3 da YouTube direttamente sul tuo computer.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="description" content="Flusiva scarica video MP4 e audio MP3 dalle tue piattaforme preferite direttamente sul computer.">
   <meta name="page-type" content="software"><meta name="site-kind" content="software">
-  <title>Flusiva — Video e audio da YouTube</title>
+  <title>Flusiva — Video e audio sul tuo computer</title>
   <link rel="icon" href="./mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./settings.css">
   <script src="./app.js" defer></script>
+  <script src="./settings.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#top">Vai al contenuto</a>
   <header class="topbar">
     <div class="brand"><img src="./mark.svg" alt="" width="36" height="36"><span>flusiva<span class="brand-dot">.</span></span></div>
     <span class="desktop-label">Il download, sul tuo computer</span>
+    <nav class="app-navigation" aria-label="Navigazione principale"><button type="button" id="nav-downloads" aria-current="page">Download</button><button type="button" id="nav-settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 3-.5 2-2 .9-1.9-.6-2 3.4 1.5 1.4v2.4L3.6 14l2 3.4 1.9-.6 2 .9.5 2h4l.5-2 2-.9 1.9.6 2-3.4-1.5-1.5v-2.4l1.5-1.4-2-3.4-1.9.6-2-.9-.5-2Z"/><circle cx="12" cy="11.5" r="3"/></svg>Impostazioni</button></nav>
     <button class="icon-button" id="help-button" aria-label="Apri le informazioni su Flusiva" title="Informazioni">?</button>
   </header>
   <main id="top">
     <div class="intro" data-enter>
       <div class="signal-dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      <span class="eyebrow">Da YouTube ai tuoi file</span>
+      <span class="eyebrow">Dalle tue piattaforme ai tuoi file</span>
       <h1>Il tuo video.<br>O solo l’audio.</h1>
       <p>Incolla un link, scegli il formato e salva.<br>Alla migliore qualità disponibile.</p>
+      <div class="platform-strip" aria-label="Piattaforme disponibili"><span>YouTube</span><span>TikTok</span><span>Vimeo</span><span>Dailymotion</span><span>SoundCloud</span></div>
     </div>
-    <section class="workspace app-frame" aria-label="Download da YouTube" data-enter>
+    <section class="workspace app-frame" aria-label="Download da un link" data-enter>
       <form id="link-form" novalidate>
-        <label for="video-url">Link di YouTube</label>
+        <label for="video-url">Link del video o della traccia</label>
         <div class="url-row">
-          <div class="input-wrap"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2"/></svg><input type="url" id="video-url" placeholder="https://www.youtube.com/watch?v=…" autocomplete="off" spellcheck="false" maxlength="2048" aria-describedby="url-error"><button type="button" id="paste-button" class="paste-button">Incolla</button></div>
+          <div class="input-wrap"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2"/></svg><input type="url" id="video-url" placeholder="Incolla qui un link…" autocomplete="off" spellcheck="false" maxlength="2048" aria-describedby="url-error"><button type="button" id="paste-button" class="paste-button">Incolla</button></div>
           <button type="submit" class="button secondary" id="inspect-button">Analizza il link</button>
         </div>
         <p id="url-error" class="error" role="alert" hidden></p>
@@ -59,7 +63,20 @@
     </section>
     <div class="local-note"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><span>Elaborato sul tuo computer. I tuoi file restano tuoi.</span></div>
   </main>
-  <footer><span id="version">Flusiva</span><span>YouTube · MP4 e MP3</span></footer>
-  <dialog id="help-dialog"><div class="dialog-heading"><h2>Informazioni su Flusiva</h2><button class="icon-button" id="close-help" aria-label="Chiudi le informazioni">×</button></div><p>Flusiva scarica un video alla volta. Scegli il formato, poi la cartella in cui salvarlo.</p><p>Il video conserva la migliore qualità MP4 disponibile. L’audio può essere convertito in MP3 fino a 320 kbps: la conversione non migliora la qualità originale.</p><p>Download e conversione avvengono su questo computer. Serve una connessione a Internet per recuperare i contenuti da YouTube.</p><p>Usa Flusiva per contenuti tuoi o che hai il permesso di scaricare. Le dirette e i video che richiedono l’accesso non sono supportati.</p><p class="small" id="system-info"></p></dialog>
+  <main id="settings-view" aria-labelledby="settings-title" hidden>
+    <aside class="settings-intro"><div class="signal-dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><span class="eyebrow">Il tuo spazio</span><h1 id="settings-title" tabindex="-1">Impostazioni</h1><p>Scegli una volta.<br>Scarica come preferisci.</p><div class="settings-local"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><span>Preferenze salvate<br>solo su questo computer.</span></div><div class="settings-sections"><a href="#settings-saving">Salvataggio</a><a href="#settings-defaults">Formato e qualità</a><a href="#settings-appearance">Aspetto</a><a href="#settings-platforms">Piattaforme</a></div></aside>
+    <div class="settings-content">
+      <form id="settings-form">
+        <section class="settings-card" id="settings-saving"><div class="settings-section-heading"><span class="settings-symbol" aria-hidden="true">↓</span><div><h2>Salvataggio</h2><p>Una destinazione per tutti i tuoi file.</p></div></div><label for="download-directory">Cartella dei download</label><div class="folder-picker"><input id="download-directory" readonly aria-describedby="folder-note"><button type="button" class="button secondary" id="choose-folder">Scegli cartella</button></div><p class="small" id="folder-note">Se un nome esiste già, il salvataggio automatico ne crea uno nuovo.</p><label class="toggle-row" for="ask-where"><span><strong>Chiedi sempre dove salvare</strong><span class="small">Scegli la destinazione prima di ogni download.</span></span><input type="checkbox" id="ask-where" role="switch"><span class="switch" aria-hidden="true"></span></label><label class="toggle-row" for="open-folder"><span><strong>Apri la cartella al termine</strong><span class="small">Mostra il file quando è pronto.</span></span><input type="checkbox" id="open-folder" role="switch"><span class="switch" aria-hidden="true"></span></label></section>
+        <section class="settings-card" id="settings-defaults"><div class="settings-section-heading"><span class="settings-symbol" aria-hidden="true">≋</span><div><h2>Formato e qualità</h2><p>Il punto di partenza per il prossimo download.</p></div></div><div class="settings-field"><div><label for="default-format">Formato predefinito</label><p class="small">Le tracce SoundCloud usano sempre MP3.</p></div><select id="default-format"><option value="mp4">Video MP4</option><option value="mp3">Audio MP3</option></select></div><div class="settings-field"><div><label for="default-video-quality">Qualità video massima</label><p class="small">La risoluzione resta limitata alla sorgente.</p></div><select id="default-video-quality"><option value="best">Migliore disponibile</option><option value="4320">8K · 4320p</option><option value="2160">4K · 2160p</option><option value="1440">1440p</option><option value="1080">Full HD · 1080p</option><option value="720">HD · 720p</option><option value="480">480p</option><option value="360">360p</option><option value="240">240p</option><option value="144">144p</option></select></div><div class="settings-field"><div><label for="default-audio-quality">Qualità audio MP3</label><p class="small">Un bitrate più alto non migliora l’originale.</p></div><select id="default-audio-quality"><option value="320">320 kbps</option><option value="256">256 kbps</option><option value="192">192 kbps</option><option value="128">128 kbps</option></select></div></section>
+        <section class="settings-card" id="settings-appearance"><div class="settings-section-heading"><span class="settings-symbol" aria-hidden="true">◐</span><div><h2>Aspetto</h2><p>Lo stesso blu, nella luce che preferisci.</p></div></div><div class="settings-field"><div><label for="app-theme">Tema dell’app</label><p class="small">Chiaro, scuro o come il sistema.</p></div><select id="app-theme"><option value="light">Chiaro</option><option value="dark">Scuro</option><option value="system">Come il sistema</option></select></div><label class="toggle-row" for="reduce-motion"><span><strong>Riduci le animazioni</strong><span class="small">Un’interfaccia ferma, con gli stessi controlli.</span></span><input type="checkbox" id="reduce-motion" role="switch"><span class="switch" aria-hidden="true"></span></label></section>
+        <div class="settings-actions"><button type="button" class="text-button" id="reset-settings">Ripristina preferenze</button><span id="settings-status" role="status" aria-live="polite"></span><button type="submit" class="button primary" id="save-settings">Salva preferenze</button></div>
+      </form>
+      <section class="settings-card" id="settings-platforms"><div class="settings-section-heading"><span class="settings-symbol" aria-hidden="true">⊕</span><div><h2>Piattaforme disponibili</h2><p>Contenuti pubblici, un link alla volta.</p></div></div><div id="platform-list" class="platform-list"></div><p class="small platform-note">La disponibilità dipende dal contenuto e dalla piattaforma. Playlist, dirette e contenuti che richiedono accesso non sono supportati.</p></section>
+      <section class="settings-about"><div class="brand"><img src="./mark.svg" alt="" width="32" height="32"><span>flusiva<span class="brand-dot">.</span></span></div><p id="settings-version">App desktop · elaborazione locale</p><p class="small" id="engine-version"></p><button class="text-button" id="view-releases" type="button">Vedi le nuove versioni</button></section>
+    </div>
+  </main>
+  <footer><span id="version">Flusiva</span><span>5 piattaforme · MP4 e MP3</span></footer>
+  <dialog id="help-dialog"><div class="dialog-heading"><h2>Informazioni su Flusiva</h2><button class="icon-button" id="close-help" aria-label="Chiudi le informazioni">×</button></div><p>Flusiva scarica un contenuto alla volta da YouTube, TikTok, Vimeo, Dailymotion e SoundCloud. Incolla il link e scegli il formato.</p><p>SoundCloud offre solo MP3. L’audio può essere convertito fino a 320 kbps: la conversione non migliora la qualità originale. La qualità video dipende dalla sorgente.</p><p>Download e conversione avvengono sul computer. Le Impostazioni ricordano le tue preferenze in un file locale, senza account o database.</p><p>Usa contenuti tuoi o che hai il permesso di scaricare. Dirette, playlist e contenuti che richiedono l’accesso non sono supportati.</p><p class="small" id="system-info"></p></dialog>
 </body>
 </html>

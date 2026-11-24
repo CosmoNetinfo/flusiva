@@ -1,4 +1,4 @@
-Prima versione di **Flusiva**, app desktop in italiano per scaricare video MP4 e audio MP3 da YouTube. Download e conversione avvengono sul computer: nessun server, account o database.
+**Flusiva 0.2.0** aggiunge nuove piattaforme e una pagina Impostazioni completa. Download e conversione avvengono sul computer: nessun server, account o database.
 
 ### Scegli il download
 
@@ -13,7 +13,11 @@ Su macOS apri il DMG e trascina l'app in Applicazioni. Su Linux rendi eseguibile
 
 ### Cosa contiene
 
-* Link YouTube, Shorts e YouTube Music per singoli video.
+* YouTube, TikTok, Vimeo e Dailymotion per video MP4 o MP3; SoundCloud per tracce MP3.
+* Link brevi TikTok e SoundCloud con destinazioni verificate.
+* Impostazioni: cartella, formato e qualità predefiniti, richiesta di destinazione, apertura della cartella al termine e ripristino.
+* Tema chiaro, scuro o di sistema; preferenze locali persistenti, senza database.
+* Salvataggio automatico con nomi univoci, senza sovrascrivere i file esistenti.
 * MP4 con video e audio uniti alla migliore qualità disponibile; MP3 fino a 320 kbps.
 * Anteprima, selezione della qualità, cartella di destinazione, avanzamento e annullamento.
 * Nuovo logo puntinato e interfaccia in blu, azzurro e bianco.
@@ -23,6 +27,8 @@ Su macOS apri il DMG e trascina l'app in Applicazioni. Su Linux rendi eseguibile
 
 Questa prima release è **senza firma digitale e senza notarizzazione Apple**. Il sistema può segnalare un editore non verificato. Verifica la provenienza dalla repository ufficiale e, se necessario, confronta il file con `SHA256SUMS.txt`. Non sono configurati aggiornamenti automatici.
 
-YouTube può limitare alcuni video. Dirette in corso, playlist, video privati e contenuti che richiedono login non sono supportati. La qualità dipende dalla sorgente: convertire a 320 kbps non migliora l’audio originale. Usare contenuti propri o autorizzati. TikTok e altre piattaforme sono nella roadmap e non sono abilitate in questa versione.
+Le piattaforme possono limitare alcuni contenuti. Nelle prove di questa versione YouTube, Dailymotion e SoundCloud hanno restituito metadati corretti; TikTok e Vimeo hanno limitato le richieste o richiesto accesso. Il loro supporto è implementato ma non garantito su ogni rete o contenuto. [Dettaglio delle prove](https://github.com/CosmoNetinfo/flusiva/blob/main/docs/PLATFORMS.md).
+
+Dirette in corso, playlist, video privati e contenuti che richiedono login non sono supportati. La qualità dipende dalla sorgente: convertire a 320 kbps non migliora l’audio originale. Usare contenuti propri o autorizzati. Instagram resta nella roadmap.
 
 Per dettagli, sviluppo e risoluzione dei problemi: [README](https://github.com/CosmoNetinfo/flusiva#readme). [Studio del logo](https://github.com/CosmoNetinfo/flusiva/blob/main/docs/BRAND.md), [roadmap](https://github.com/CosmoNetinfo/flusiva/blob/main/docs/ROADMAP.md) e [segnalazioni](https://github.com/CosmoNetinfo/flusiva/issues).
