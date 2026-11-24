@@ -2,6 +2,7 @@ package info.cosmonet.flusiva
 
 import android.content.Intent
 import android.provider.MediaStore
+import android.media.MediaMetadataRetriever
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.UiDevice
@@ -30,6 +31,11 @@ class AndroidSmokeTest {
         val sample = File(context.cacheDir, "flusiva-test.mp3")
         val process = ProcessBuilder(File(native, "libffmpeg.so").path, "-hide_banner", "-y", "-f", "lavfi", "-i", "sine=frequency=440:duration=1", "-codec:a", "libmp3lame", "-b:a", "320k", sample.path).redirectErrorStream(true).apply { environment()["LD_LIBRARY_PATH"] = libraries.path }.start()
         val log = process.inputStream.bufferedReader().readText(); assertEquals(log, 0, process.waitFor()); assertTrue(sample.length() > 10000)
+        val movie = File(context.cacheDir, "flusiva-test.mp4")
+        val video = ProcessBuilder(File(native, "libffmpeg.so").path, "-hide_banner", "-y", "-f", "lavfi", "-i", "color=c=blue:s=128x128:r=10:d=1", "-i", sample.path, "-c:v", "mpeg4", "-c:a", "aac", "-shortest", movie.path).redirectErrorStream(true).apply { environment()["LD_LIBRARY_PATH"] = libraries.path }.start()
+        val videoLog = video.inputStream.bufferedReader().readText(); assertEquals(videoLog, 0, video.waitFor())
+        val retriever = MediaMetadataRetriever()
+        try { retriever.setDataSource(movie.path); assertEquals("yes", retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO)); assertEquals("yes", retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO)) } finally { retriever.release(); movie.delete() }
         val saved = Downloads.save(context, sample, "Flusiva test", "mp3") { false }
         try { assertTrue(context.contentResolver.openInputStream(saved)!!.use { it.readBytes().size } > 10000) } finally { context.contentResolver.delete(saved, null, null); sample.delete() }
         val cancelled = File(context.cacheDir, "cancel-test.mp3").apply { writeBytes(ByteArray(32)) }

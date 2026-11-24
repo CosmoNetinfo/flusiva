@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0 — 2026-11-24
+
+* App Android nativa Kotlin per Android 10+, APK universale ARM64/ARMv7/x86_64.
+* Download e conversione locali con yt-dlp, Python, QuickJS e FFmpeg inclusi. Stesse cinque piattaforme del desktop; Spotify rimandato.
+* Ricezione link da Condividi, analisi, scelta MP4/MP3 e qualità massima o personalizzata.
+* Salvataggio in Download/Flusiva con MediaStore, apertura e condivisione dei file, senza accesso generale alla memoria.
+* Servizio con notifica, avanzamento, annullamento e protezione dai download simultanei. Preferenze locali e controllo aggiornamenti con download manuale dell’APK.
+* Firma Android gratuita stabile nelle GitHub Actions; test JVM, Android Lint, test del motore e della UI su emulatore. APK incluso nella Release e nei checksum.
+* Prima versione Android: singolo download, tema chiaro; coda e temi desktop non ancora disponibili su telefono.
+
 ## 0.4.1 — 2026-11-24
 
 * Aggiornamenti automatici con electron-updater: controllo all’avvio e ogni 6 ore, download verificato SHA-512 e avanzamento.

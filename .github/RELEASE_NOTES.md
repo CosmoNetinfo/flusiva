@@ -1,4 +1,16 @@
-**Flusiva 0.4.1** implementa gli aggiornamenti dell’app: controllo, download verificato e installazione. Download multimediali e conversioni continuano a svolgersi sul computer, senza account o server Flusiva. Codice GPL-3.0-only.
+**Flusiva 0.5.0** arriva su Android. Download e conversioni avvengono sul telefono o sul computer, senza account o server Flusiva. Codice GPL-3.0-only.
+
+### Android
+
+Scarica **Flusiva-0.5.0-android.apk** per Android 10 o successivi. APK universale ARM64, ARMv7 e x86_64, firmato con la chiave gratuita del progetto.
+
+* Incolla il link o usa **Condividi → Flusiva** da YouTube e dalle altre piattaforme supportate.
+* Analizza il contenuto e scarica video MP4 o audio MP3, con qualità massima o personalizzata.
+* I file finiscono in **Download/Flusiva**, pronti da aprire o condividere. Python, yt-dlp, QuickJS e FFmpeg sono inclusi.
+* Notifica di avanzamento, annullamento, preferenze e controllo delle nuove versioni.
+* Android richiede la conferma per installare e aggiornare l’APK. La prima versione Android gestisce un file alla volta, con tema chiaro.
+
+[Guida Android](https://github.com/CosmoNetinfo/flusiva/blob/main/docs/ANDROID.md). Nessuna pubblicazione sul Play Store.
 
 ### Aggiornamenti automatici
 

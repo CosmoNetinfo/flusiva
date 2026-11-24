@@ -1,5 +1,13 @@
 # Verifiche della prima versione
 
+## Estensione Android 0.5.0
+
+* Compilazione locale dell’APK riuscita, Android Lint senza errori e 4 test JVM superati per URL, piattaforme, qualità e nomi file.
+* Verificata la presenza delle architetture ARM64, ARMv7 e x86_64, minSdk 29 e targetSdk 36 nell’APK.
+* GitHub Actions aggiunge test su emulatore Android 15 per motore nativo, QuickJS, FFmpeg/MP3 e MP4 con audio, MediaStore, annullamento del salvataggio, link condivisi e Impostazioni. Gli esiti della CI vengono verificati prima della pubblicazione.
+* 41 test desktop superati anche dopo l’aggiunta dell’APK alla preparazione dei checksum della Release.
+* Le prove Android non dimostrano un download online riuscito da tutte le piattaforme su tutti i telefoni. Test sui dispositivi fisici e sulle reti degli utenti ancora necessari.
+
 ## Estensione 0.4.1
 
 * Release v0.4.1 pubblicata dopo build riuscite su Windows x64, Linux x64, Mac Intel e Mac Apple Silicon. Su Linux un HTTP 504 del servizio di download yt-dlp ha richiesto la riesecuzione del job, poi completato.

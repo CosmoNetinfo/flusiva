@@ -2,9 +2,9 @@
 
 <img src="docs/brand/flusiva-wordmark.svg" alt="Flusiva" width="250">
 
-App desktop per scaricare **video MP4 e audio MP3 da YouTube, TikTok, Vimeo, Dailymotion e SoundCloud**, con interfaccia in italiano. Windows, Linux e macOS (Intel e Apple Silicon). Il computer dell'utente esegue download e conversione: nessun server remoto, account, hosting o database.
+App per scaricare **video MP4 e audio MP3 da YouTube, TikTok, Vimeo, Dailymotion e SoundCloud**, con interfaccia in italiano. Windows, Linux, macOS (Intel e Apple Silicon) e Android 10+. Download e conversione avvengono sul dispositivo: nessun server remoto, account, hosting o database.
 
-Flusiva è gratuito e open source, distribuito con licenza [GNU GPL v3](LICENSE). La versione 0.4 aggiunge download e installazione degli aggiornamenti dell’app, con avanzamento e protezione dei download in corso.
+Flusiva è gratuito e open source, distribuito con licenza [GNU GPL v3](LICENSE). La versione 0.5 aggiunge l’app Android nativa con link condivisi, download locali, notifiche e Impostazioni.
 
 ![Interfaccia desktop di Flusiva](docs/images/flusiva-desktop.png)
 
@@ -17,6 +17,7 @@ Gli installer sono nella sezione [Releases](https://github.com/CosmoNetinfo/flus
 | Sistema | File |
 | --- | --- |
 | Windows 10/11 x64 | Installer `.exe` |
+| Android 10+ ARM64, ARMv7 e x86_64 | APK universale `android.apk` |
 | Linux x64 | `.AppImage` oppure pacchetto Debian/Ubuntu `.deb` |
 | macOS Intel | `.dmg` / `.zip` con `x64` nel nome |
 | macOS Apple Silicon | `.dmg` / `.zip` con `arm64` nel nome |
@@ -141,8 +142,8 @@ Compilare sul sistema di destinazione. GitHub Actions esegue automaticamente i c
 Per pubblicare gli installer creare e inviare un tag coerente con `package.json`:
 
 ```sh
-git tag v0.4.1
-git push origin v0.4.1
+git tag v0.5.0
+git push origin v0.5.0
 ```
 
 Il workflow pubblica una GitHub Release solo quando tutte e quattro le build riescono. Prepara i feed Windows/Linux/macOS con SHA-512 e unisce le architetture Mac. Carica tutti i file in una bozza e la pubblica solo al termine. Include `SHA256SUMS.txt`. Nessun workflow Pages è necessario.

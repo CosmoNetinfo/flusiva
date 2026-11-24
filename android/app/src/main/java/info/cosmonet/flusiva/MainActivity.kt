@@ -63,8 +63,8 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); setIntent(intent); receive(intent) }
     private fun receive(intent: Intent?) {
         if (intent?.action == Intent.ACTION_SEND && intent.type == "text/plain") {
-            draft = MediaPolicy.sharedLink(intent.getStringExtra(Intent.EXTRA_TEXT).orEmpty())
-            showPage(false); link.setText(draft)
+            val shared = MediaPolicy.sharedLink(intent.getStringExtra(Intent.EXTRA_TEXT).orEmpty())
+            showPage(false); draft = shared; link.setText(shared)
         }
     }
     override fun onResume() { super.onResume(); DownloadState.observers.add(observer); if (!settings) render(DownloadState.value) }
