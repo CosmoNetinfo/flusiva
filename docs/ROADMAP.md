@@ -1,6 +1,6 @@
 # Prossime versioni di Flusiva
 
-Valutazione del 24 novembre 2026, aggiornata per 0.2.0. YouTube, TikTok, Vimeo, Dailymotion e SoundCloud sono implementati. [Esiti reali e limiti delle prove](PLATFORMS.md). La pagina Impostazioni include cartella, qualità, formato, temi e preferenze di salvataggio.
+Valutazione del 24 novembre 2026, aggiornata per 0.3.0. YouTube, TikTok, Vimeo, Dailymotion e SoundCloud sono implementati. La 0.3 aggiunge coda seriale, dati del trasferimento, qualità massima e controllo delle nuove versioni. [Esiti reali e limiti delle prove](PLATFORMS.md). Spotify è stato rimandato su richiesta del proprietario.
 
 ## Prima di aggiungere piattaforme
 
@@ -10,8 +10,10 @@ Valutazione del 24 novembre 2026, aggiornata per 0.2.0. YouTube, TikTok, Vimeo, 
 | 1 | Firma Windows e firma/notarizzazione macOS | Riduce gli ostacoli all’installazione | Certificati del proprietario configurati come secret, verifica su macchine pulite |
 | 1 | Test dei download su tre sistemi | I test automatici con fixture non verificano YouTube | MP4 con audio, MP3, annullamento e disco pieno verificati su ogni OS |
 | Completata in 0.2 | Cartella preferita, formato e qualità ricordati | Riduce i clic sui download successivi | File JSON locale atomico, pagina Impostazioni, temi chiaro/scuro e ripristino |
-| 2 | Coda di download e ripresa | Utile per più link e interruzioni di rete | Una conversione per volta, spazio su disco controllato, stato comprensibile |
-| 2 | Velocità e tempo stimato | Rende chiara l’attesa | Valori reali dal processo, nessuna percentuale simulata durante la conversione |
+| Completata in 0.3 | Coda e tentativi individuali | Utile per più link | Un file per volta, pausa dopo quello attuale, annullamento e tentativi dall’inizio |
+| Completata in 0.3 | Velocità e tempo stimato | Rende chiara l’attesa | Valori reali dal processo, nessuna percentuale simulata durante la conversione |
+| Completata in 0.3 | Controllo delle nuove versioni | Rende disponibili gli aggiornamenti del motore tramite il nuovo installer | Release ufficiali stabili, controllo manuale o facoltativo all’avvio; installazione manuale |
+| Completata in 0.3 | Qualità massima | Cerca la migliore sorgente esposta dal servizio | Selezione video migliore senza preferenza per MP4 inferiori; MP3 a 320 kbps senza promesse di qualità superiore alla sorgente |
 | 3 | Formato audio originale M4A/Opus | Evita una ricodifica quando MP3 non serve | Formato e compatibilità spiegati prima del download |
 | 3 | Sottotitoli e intervallo temporale | Consente di salvare solo la parte utile | Selezione dei sottotitoli disponibili e taglio con durata verificata |
 
@@ -37,4 +39,4 @@ Per TikTok i link abbreviati richiederanno risoluzione controllata prima del dow
 
 ## Sequenza consigliata
 
-**0.2:** quattro nuove piattaforme e Impostazioni implementate. **Prossimo ciclo:** più prove dei download sulle reti degli utenti, stabilità degli estrattori, firma e aggiornamenti verificati. **Poi:** coda di download e valutazione Instagram. Nessuna data promessa prima delle prove tecniche.
+**0.3:** coda, avanzamento, qualità massima e controllo delle versioni completati. **Prossimo ciclo:** prove sulle reti degli utenti, affidabilità degli estrattori, firma, aggiornamenti verificati e gestione dello spazio. **Poi:** ripresa di file parziali, coda persistente facoltativa e valutazione Instagram. Nessuna data promessa prima delle prove tecniche. Spotify rimane fuori dal piano attuale.

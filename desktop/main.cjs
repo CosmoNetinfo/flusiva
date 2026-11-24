@@ -8,6 +8,9 @@ const { safeFilename } = require('../core/youtube.cjs');
 const {PLATFORMS,downloadOptions:validateDownload}=require('../core/platforms.cjs');
 const {createSettingsStore}=require('../core/settings.cjs');
 const {saveUnique}=require('../core/files.cjs');
+const {createQueue}=require('../core/queue.cjs');
+const {createUpdateChecker}=require('../core/updates.cjs');
+const {resolveQuality}=require('../core/quality.cjs');
 
 let window, active, inspected, lastSaved;
 const page = pathToFileURL(join(__dirname,'../public/index.html')).href;
@@ -22,6 +25,44 @@ else {
     const downloader = createDownloader({ toolsDir: app.isPackaged ? join(process.resourcesPath,'tools') : join(__dirname,'../vendor'), tempRoot: app.getPath('temp') });
     const settings=createSettingsStore(join(app.getPath('userData'),'settings.json'),app.getPath('downloads'));
     const chosenDirectories=new Set();
+    const send=(channel,value)=>{if(window&&!window.isDestroyed())window.webContents.send(channel,value);};
+    const checkUpdates=createUpdateChecker(app.getVersion());
+    let lastUpdate=null;
+    async function saveDownload(info,{format,quality},{signal,onProgress},preferences){
+      validateDownload(format,quality,info);
+      let result;
+      try{
+        const destination=preferences.askWhereToSave?await dialog.showSaveDialog(window,{title:'Salva il download',defaultPath:join(preferences.downloadDirectory,safeFilename(info.title,format)),filters:[{name:format.toUpperCase(),extensions:[format]}]}):null;
+        if(destination?.canceled||signal.aborted)return {cancelled:true};
+        result=await downloader.download(info,format,quality,{signal,onProgress});
+        onProgress({phase:'saving',percent:null});
+        if(signal.aborted)throw new Error('Operazione annullata.');
+        let savedPath;
+        if(destination){
+          const staging=`${destination.filePath}.${randomUUID()}.flusiva-part`;
+          try{await copyFile(result.path,staging);if(signal.aborted)throw new Error('Operazione annullata.');await require('node:fs/promises').rename(staging,destination.filePath);}finally{await unlink(staging).catch(()=>{});}
+          savedPath=destination.filePath;
+        }else savedPath=await saveUnique(result.path,preferences.downloadDirectory,info.title,format);
+        lastSaved=savedPath;
+        if(preferences.openFolderAfterDownload)shell.showItemInFolder(savedPath);
+        return {path:savedPath};
+      }catch(error){
+        if(['EACCES','EPERM','ENOENT'].includes(error.code))throw new Error('La cartella di download non è disponibile o non è scrivibile. Scegli un’altra cartella nelle Impostazioni.');
+        if(error.code==='ENOSPC')throw new Error('Spazio su disco insufficiente. Libera spazio e riprova.');
+        throw error;
+      }finally{await result?.cleanup();}
+    }
+    const queue=createQueue({
+      onChange:state=>send('queue:changed',state),
+      async run(job,{signal,onProgress}){
+        const preferences=await settings.get();
+        const info=await downloader.inspect(job.url,signal);
+        const format=info.hasVideo?job.requestedFormat:'mp3';
+        const quality=resolveQuality(format,format===job.requestedFormat?job.requestedQuality:preferences.audioQuality,preferences);
+        onProgress({phase:'inspect',title:info.title,platformName:info.platformName,format,quality});
+        return saveDownload(info,{format,quality},{signal,onProgress},preferences);
+      }
+    });
     session.defaultSession.setPermissionRequestHandler((_contents,_permission,callback) => callback(false));
     session.defaultSession.setPermissionCheckHandler(() => false);
     const trusted = event => {
@@ -33,42 +74,35 @@ else {
       catch (error) { return { ok: false, error: error.message }; }
     });
     handle('video:inspect', async url => {
-      if (active) throw new Error('Attendi il completamento dell’operazione in corso.');
+      if (active||queue.isBusy()) throw new Error('Attendi il download in corso o metti in pausa la coda.');
       active = new AbortController(); inspected = undefined;
       try { inspected = await downloader.inspect(url, active.signal); return inspected; } finally { active = undefined; }
     });
     handle('video:download', async options => {
-      if (active) throw new Error('È già in corso un’operazione.');
+      if (active||queue.isBusy()) throw new Error('Attendi il download in corso o metti in pausa la coda.');
       if (!inspected) throw new Error('Analizza prima il link di un video o di una traccia.');
       const { format, quality } = options || {};
       validateDownload(format,quality,inspected);
       const controller = new AbortController(); active = controller;
-      let result;
       try {
         const preferences=await settings.get();
-        const destination=preferences.askWhereToSave?await dialog.showSaveDialog(window,{title:'Salva il download',defaultPath:join(preferences.downloadDirectory,safeFilename(inspected.title,format)),filters:[{name:format.toUpperCase(),extensions:[format]}]}):null;
-        if (destination?.canceled || controller.signal.aborted) return { cancelled: true };
-        result = await downloader.download(inspected,format,quality,{ signal: controller.signal, onProgress: progress => { if (!window?.isDestroyed()) window.webContents.send('video:progress',progress); } });
-        // Keep partial copies away from the chosen filename; preserve an existing file on errors.
-        if(destination) {
-          const staging = `${destination.filePath}.${randomUUID()}.flusiva-part`;
-          try {
-            await copyFile(result.path, staging);
-            if (controller.signal.aborted) throw new Error('Operazione annullata.');
-            await require('node:fs/promises').rename(staging,destination.filePath);
-          } finally { await unlink(staging).catch(() => {}); }
-          lastSaved=destination.filePath;
-        } else lastSaved=await saveUnique(result.path,preferences.downloadDirectory,inspected.title,format);
-        if(preferences.openFolderAfterDownload)shell.showItemInFolder(lastSaved);
-        return { path: lastSaved };
-      } catch(error) {
-        if(['EACCES','EPERM','ENOENT'].includes(error.code))throw new Error('La cartella di download non è disponibile o non è scrivibile. Scegli un’altra cartella nelle Impostazioni.');
-        if(error.code==='ENOSPC')throw new Error('Spazio su disco insufficiente. Libera spazio e riprova.');
-        throw error;
-      } finally {try{await result?.cleanup();}finally{active = undefined;} }
+        const effectiveQuality=resolveQuality(format,quality,preferences);
+        return await saveDownload(inspected,{format,quality:effectiveQuality},{signal:controller.signal,onProgress:progress=>send('video:progress',progress)},preferences);
+      } finally {active=undefined;}
     });
     handle('video:cancel', () => { active?.abort(); });
-    handle('clipboard:read', () => clipboard.readText().slice(0,2048));
+    handle('queue:get',()=>queue.snapshot());
+    handle('queue:add',({urls,format,quality}={})=>queue.add(urls,{format,quality}));
+    handle('queue:start',()=>{if(active)throw new Error('Attendi la fine del download singolo.');return queue.start();});
+    handle('queue:pause',()=>queue.pause());
+    handle('queue:cancel',id=>queue.cancel(id));
+    handle('queue:cancel-all',()=>queue.cancelAll());
+    handle('queue:retry',id=>queue.retry(id));
+    handle('queue:clear',()=>queue.clearFinished());
+    handle('queue:reveal',id=>{const item=queue.snapshot().items.find(job=>job.id===id);if(item?.status==='done'&&item.path)shell.showItemInFolder(item.path);});
+    handle('updates:check',async()=>{lastUpdate=await checkUpdates();return lastUpdate;});
+    handle('updates:open',()=>shell.openExternal(lastUpdate?.status==='available'?lastUpdate.url:'https://github.com/CosmoNetinfo/flusiva/releases'));
+    handle('clipboard:read', () => clipboard.readText().slice(0,102400));
     handle('file:reveal', () => { if (lastSaved) shell.showItemInFolder(lastSaved); });
     handle('settings:get',()=>settings.get());
     handle('settings:update',patch=>{
@@ -95,9 +129,9 @@ else {
       window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
       window.webContents.on('will-navigate', event => event.preventDefault());
       window.on('close', event => {
-        if (!active) return;
-        const choice = dialog.showMessageBoxSync(window, { type: 'question', buttons: ['Continua il download','Esci e annulla'], defaultId: 0, cancelId: 0, message: 'Un’operazione è ancora in corso.', detail: 'Chiudendo Flusiva il download verrà annullato.' });
-        if (choice === 0) event.preventDefault(); else active.abort();
+        if (!active&&!queue.hasUnfinished()) return;
+        const choice = dialog.showMessageBoxSync(window, { type: 'question', buttons: ['Continua i download','Esci e annulla'], defaultId: 0, cancelId: 0, message: 'Ci sono download in corso o in attesa.', detail: 'Chiudendo Flusiva annulli il download attuale e la coda di questa sessione.' });
+        if (choice === 0) event.preventDefault(); else{active?.abort();queue.cancelAll();}
       });
       window.on('closed', () => { window = undefined; });
       const loaded = window.loadFile(join(__dirname,'../public/index.html'));
@@ -122,6 +156,26 @@ else {
             return {original:original.ok,saved:saved.ok,persisted:persisted.value?.theme==='dark'&&persisted.value?.audioQuality==='192',invalid:!invalid.ok,deniedPath:!deniedPath.ok,reset:reset.value?.theme==='light',navigation,platformCount};
           })()`);
           if(Object.entries(preferencesCheck).some(([key,value])=>key==='platformCount'?value!==5:value!==true))throw new Error(`Smoke impostazioni: ${JSON.stringify(preferencesCheck)}`);
+          const queueCheck=await window.webContents.executeJavaScript(`(async()=>{
+            document.getElementById('queue-composer').open=true;
+            document.getElementById('queue-links').value='https://vimeo.com/123\\nhttps://vimeo.com/456';
+            document.getElementById('queue-form').requestSubmit();
+            let snapshot;
+            for(let attempt=0;attempt<100;attempt++){snapshot=(await window.flusiva.getQueue()).value;if(snapshot.items.length===2&&document.querySelectorAll('.queue-row').length===2)break;await new Promise(resolve=>setTimeout(resolve,20));}
+            const added=snapshot.items.length===2&&snapshot.paused&&document.querySelectorAll('.queue-row').length===2;
+            const invalid=await window.flusiva.addToQueue({urls:['https://evil.test/video'],format:'mp4',quality:'best'});
+            await window.flusiva.cancelQueueItem(snapshot.items[0].id);
+            await window.flusiva.retryQueueItem(snapshot.items[0].id);
+            const retried=(await window.flusiva.getQueue()).value.items[0].status==='waiting';
+            await window.flusiva.cancelQueue();await window.flusiva.clearQueue();
+            const cleared=(await window.flusiva.getQueue()).value.items.length===0;
+            document.getElementById('queue-composer').open=false;
+            document.getElementById('queue-announcement').textContent='';
+            const controls=!!document.getElementById('check-updates')&&!!document.getElementById('metric-speed')&&document.getElementById('settings-updates').closest('form')?.id==='settings-form';
+            window.scrollTo(0,0);
+            return {added,invalid:!invalid.ok,retried,cleared,controls};
+          })()`);
+          if(Object.values(queueCheck).some(value=>value!==true))throw new Error(`Smoke coda: ${JSON.stringify(queueCheck)}`);
           const { execFileSync } = require('node:child_process');
           const tools = app.isPackaged ? join(process.resourcesPath,'tools') : join(__dirname,'../vendor');
           for (const binary of ['yt-dlp','ffmpeg','ffprobe']) execFileSync(join(tools,binary+(process.platform === 'win32' ? '.exe' : '')),[binary === 'yt-dlp' ? '--version' : '-version'],{windowsHide:true,timeout:15_000,stdio:'pipe'});
@@ -138,11 +192,19 @@ else {
             await window.webContents.executeJavaScript("document.documentElement.dataset.theme='dark'");
             await require('node:fs/promises').writeFile(join(shots,'settings-dark.png'),(await window.webContents.capturePage()).toPNG());
             await window.webContents.executeJavaScript("document.documentElement.dataset.theme='light';document.getElementById('nav-downloads').click()");
+            await window.webContents.executeJavaScript("window.flusiva.addToQueue({urls:['https://www.youtube.com/watch?v=aqz-KE-bpKQ','https://soundcloud.com/ethmusic/lostin-powers-she-so-heavy'],format:'mp4',quality:'best'})");
+            await window.webContents.executeJavaScript("document.getElementById('queue-composer').open=true;document.getElementById('nav-queue').click()");
+            await new Promise(resolve=>setTimeout(resolve,200));
+            await require('node:fs/promises').writeFile(join(shots,'queue.png'),(await window.webContents.capturePage()).toPNG());
+            await window.webContents.executeJavaScript("(async()=>{await window.flusiva.cancelQueue();await window.flusiva.clearQueue();document.getElementById('queue-composer').open=false;document.getElementById('nav-settings').click();document.getElementById('settings-updates').scrollIntoView({block:'center'});})()");
+            await new Promise(resolve=>setTimeout(resolve,200));
+            await require('node:fs/promises').writeFile(join(shots,'updates.png'),(await window.webContents.capturePage()).toPNG());
+            await window.webContents.executeJavaScript("document.getElementById('nav-downloads').click()");
           }
           if (process.argv.includes('--brand-study') && !app.isPackaged && process.env.CI !== 'true') {
             await require('node:fs/promises').mkdir(join(__dirname,'../docs/images'),{recursive:true});
             await require('node:fs/promises').copyFile(join(__dirname,'../test-results/desktop.png'),join(__dirname,'../docs/images/flusiva-desktop.png'));
-            for(const name of ['settings-light','settings-dark'])await require('node:fs/promises').copyFile(join(__dirname,`../test-results/${name}.png`),join(__dirname,`../docs/images/${name}.png`));
+            for(const name of ['settings-light','settings-dark','queue','updates'])await require('node:fs/promises').copyFile(join(__dirname,`../test-results/${name}.png`),join(__dirname,`../docs/images/${name}.png`));
             window.setContentSize(1440,1000);
             await window.loadFile(join(__dirname,'../docs/brand/study.html'));
             await require('node:fs/promises').writeFile(join(__dirname,'../docs/brand/logo-study.png'),(await window.webContents.capturePage()).toPNG());

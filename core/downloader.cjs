@@ -2,6 +2,7 @@ const { spawn } = require('node:child_process');
 const { join } = require('node:path');
 const { mkdtemp, readdir, rm, stat } = require('node:fs/promises');
 const { identify,resolveLink,summarize,downloadOptions,friendlyError } = require('./platforms.cjs');
+const {PROGRESS_TEMPLATE,parseProgress}=require('./progress.cjs');
 
 function stopChild(child) {
   if (!child.pid || child.exitCode !== null) return;
@@ -57,13 +58,12 @@ function createDownloader({ toolsDir, tempRoot, nodePath = process.execPath, run
       const options = downloadOptions(format, quality,info);
       const directory = await mkdtemp(join(tempRoot, 'flusiva-'));
       try {
-        await runner(yt, [...common,...options,'--newline','--progress','--progress-template','download:FLUSIVA:%(progress._percent_str)s','--max-filesize','8G','-o',join(directory,'media.%(ext)s'),'--',url], {
+        await runner(yt, [...common,...options,'--newline','--progress','--progress-delta','0.5','--progress-template',PROGRESS_TEMPLATE,'--max-filesize','8G','-o',join(directory,'media.%(ext)s'),'--',url], {
           env, signal, timeout: 2 * 60 * 60 * 1000,
           onLine(line) {
-            if (line.startsWith('FLUSIVA:')) {
-              const percent = Number.parseFloat(line.slice(8));
-              if (Number.isFinite(percent)) onProgress({ phase: 'download', percent: Math.min(99, Math.max(0, percent)) });
-            } else if (/\[(ExtractAudio|Merger|Metadata|VideoRemuxer)\]/.test(line)) onProgress({ phase: 'conversion', percent: null });
+            const progress=parseProgress(line);
+            if(progress)onProgress(progress);
+            else if (/\[(ExtractAudio|Merger|Metadata|VideoRemuxer)\]/.test(line)) onProgress({ phase: 'conversion', percent: null });
           }
         });
         if (signal?.aborted) throw new Error('cancelled');

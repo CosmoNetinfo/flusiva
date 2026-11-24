@@ -14,6 +14,7 @@ function parseUrl(value) {
 }
 function identify(value) {
   const url=parseUrl(value),host=url.hostname.toLowerCase(),path=url.pathname;
+  if(['open.spotify.com','spotify.link','www.spotify.com','spotify.com'].includes(host))throw new Error('Spotify non fornisce un MP3 completo scaricabile tramite questa integrazione. Non è possibile esportare il brano da questo link.');
   if(['youtube.com','www.youtube.com','m.youtube.com','music.youtube.com','youtu.be'].includes(host))return {platform:'youtube',url:youtube.normalizeUrl(value)};
   if(['www.tiktok.com','tiktok.com','m.tiktok.com'].includes(host)) {
     const match=path.match(/^\/@([\w.-]+)\/video\/(\d{10,25})\/?$/);
@@ -78,13 +79,13 @@ function summarize(info,item) {
 function downloadOptions(format,quality,info) {
   if(format==='mp3') {
     if(info&&!info.hasAudio)throw new Error('Questo contenuto non ha una traccia audio disponibile.');
-    return youtube.downloadOptions(format,quality);
+    return [...youtube.downloadOptions(format,quality),'--format-sort','quality,abr,asr'];
   }
   youtube.downloadOptions(format,quality); // Shared quality validation.
   if(info?.platform==='soundcloud'||info?.hasVideo===false)throw new Error('Questo contenuto è solo audio. Scegli MP3.');
   const height=quality==='best'?'':`[height<=${quality}]`;
-  const audio=info?.hasAudio===false?`bv${height}`:`bv${height}+ba`;
-  return ['-f',`bv[ext=mp4]${height}+ba[ext=m4a]/b[ext=mp4]${height}/${audio}/b[vcodec!=none]${height}`,'--merge-output-format','mp4','--remux-video','mp4','--embed-metadata','--postprocessor-args','Merger+ffmpeg_o:-movflags +faststart'];
+  const audio=info?.hasAudio===false?`bv*${height}`:`bv*${height}+ba`;
+  return ['-f',`${audio}/b[vcodec!=none]${height}`,'--format-sort','res,fps','--merge-output-format','mp4','--remux-video','mp4','--embed-metadata','--postprocessor-args','Merger+ffmpeg_o:-movflags +faststart'];
 }
 function friendlyError(raw,platform='la piattaforma') {
   platform=PLATFORMS.find(item=>item.id===platform)?.name||platform;

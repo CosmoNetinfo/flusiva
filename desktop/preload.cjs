@@ -11,6 +11,21 @@ contextBridge.exposeInMainWorld('flusiva', {
   chooseFolder:()=>ipcRenderer.invoke('settings:choose-folder'),
   resetSettings:()=>ipcRenderer.invoke('settings:reset'),
   releases:()=>ipcRenderer.invoke('app:releases'),
+  getQueue:()=>ipcRenderer.invoke('queue:get'),
+  addToQueue:options=>ipcRenderer.invoke('queue:add',options),
+  startQueue:()=>ipcRenderer.invoke('queue:start'),
+  pauseQueue:()=>ipcRenderer.invoke('queue:pause'),
+  cancelQueueItem:id=>ipcRenderer.invoke('queue:cancel',id),
+  cancelQueue:()=>ipcRenderer.invoke('queue:cancel-all'),
+  retryQueueItem:id=>ipcRenderer.invoke('queue:retry',id),
+  clearQueue:()=>ipcRenderer.invoke('queue:clear'),
+  revealQueueItem:id=>ipcRenderer.invoke('queue:reveal',id),
+  checkUpdates:()=>ipcRenderer.invoke('updates:check'),
+  openUpdate:()=>ipcRenderer.invoke('updates:open'),
+  onQueueChanged:callback=>{
+    const listener=(_event,state)=>callback(state);ipcRenderer.on('queue:changed',listener);
+    return ()=>ipcRenderer.removeListener('queue:changed',listener);
+  },
   onProgress: callback => {
     const listener = (_event, progress) => callback(progress);
     ipcRenderer.on('video:progress', listener);

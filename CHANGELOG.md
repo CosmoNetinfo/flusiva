@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 — 2026-11-24
+
+* Coda seriale: inserimento multiplo, deduplicazione, pausa dopo il file attuale, annullamento, tentativi individuali, apertura dei file e pulizia degli elementi terminati.
+* Byte scaricati, dimensione, velocità e tempo rimanente reali per la traccia corrente; dimensioni stimate e dati assenti espliciti.
+* Modalità qualità massima, attiva inizialmente, anche nella coda: migliore sorgente video/audio e MP3 a 320 kbps. Disattivabile per usare limiti manuali.
+* Selezione video senza preferire contenitori MP4 inferiori alla migliore sorgente disponibile; remux senza aumento artificiale della qualità.
+* Controllo manuale delle Release GitHub e controllo facoltativo all’avvio. Versioni stabili verificate, gestione offline e limite richieste. Installazione manuale.
+* Licenza del progetto GPL-3.0-only, sezione Uso responsabile e descrizione About della repository.
+* 33 test deterministici; test Electron su coda, preferenze e controlli. Spotify rimandato per scelta del proprietario.
+
 ## 0.2.0 — 2026-11-24
 
 * Nuovi servizi: TikTok, Vimeo, Dailymotion e SoundCloud, oltre a YouTube; solo contenuti pubblici singoli. TikTok e Vimeo possono richiedere accesso o limitare le richieste.

@@ -2,6 +2,8 @@
 const api = window.flusiva;
 const $ = id => document.getElementById(id);
 let video = null, format = 'mp4', busy = false, cancelled = false;
+let queueRunning=false;
+document.addEventListener('flusiva:queue',event=>{const state=event.detail;queueRunning=!!state.runningId||(!state.paused&&state.items.some(item=>item.status==='waiting'));setBusy(busy);});
 let preferences={defaultFormat:'mp4',videoQuality:'best',audioQuality:'320',askWhereToSave:true};
 document.addEventListener('flusiva:preferences',event=>{
   preferences=event.detail;
@@ -12,19 +14,23 @@ function showError(message) { setText('url-error',message); $('url-error').hidde
 function clearError() { $('url-error').hidden = true; $('video-url').removeAttribute('aria-invalid'); }
 function setBusy(value) {
   busy = value;
-  ['video-url','paste-button','inspect-button','quality'].forEach(id => { $(id).disabled = value; });
-  document.querySelectorAll('[data-format]').forEach(button => { button.disabled = value; });
-  $('download-button').disabled = value || !video || (format === 'mp4' && !video.hasVideo) || (format === 'mp3' && !video.hasAudio);
-  document.querySelector('[data-format="mp4"]').disabled=value||video?.hasVideo===false;
+  const locked=value||queueRunning;
+  ['video-url','paste-button','inspect-button','quality'].forEach(id => { $(id).disabled = locked; });
+  $('quality').disabled=locked||preferences.maximumQuality===true;
+  document.querySelectorAll('[data-format]').forEach(button => { button.disabled = locked; });
+  $('download-button').disabled = locked || !video || (format === 'mp4' && !video.hasVideo) || (format === 'mp3' && !video.hasAudio);
+  $('enqueue-current').disabled=value||!video;
+  document.querySelector('[data-format="mp4"]').disabled=locked||video?.hasVideo===false;
+  document.dispatchEvent(new CustomEvent('flusiva:single-busy',{detail:value}));
 }
 function updateFormat() {
   document.querySelectorAll('[data-format]').forEach(button => { const selected = button.dataset.format === format; button.classList.toggle('selected',selected); button.setAttribute('aria-pressed',String(selected)); });
   document.querySelector('label[for="quality"]').textContent = format === 'mp4' ? 'Qualità del video' : 'Qualità dell’audio';
-  setText('quality-note',format === 'mp4' ? 'La risoluzione dipende dal video originale.' : 'La conversione non migliora l’audio originale.');
+  setText('quality-note',preferences.maximumQuality?(format==='mp4'?'Qualità massima: migliore sorgente video e audio.':'Migliore sorgente audio → MP3 a 320 kbps.'):format === 'mp4' ? 'La risoluzione dipende dal video originale.' : 'La conversione non migliora l’audio originale.');
   $('quality').replaceChildren();
   const choices = format === 'mp3' ? [['320','320 kbps'],['256','256 kbps'],['192','192 kbps'],['128','128 kbps']] : [['best','Migliore disponibile'],...[4320,2160,1440,1080,720,480,360,240,144].filter(height=>!video||(height<=Math.max(...video.heights,0)&&video.heights.some(available=>available<=height))).map(height => [String(height),`${height}p${height === 2160 ? ' · 4K' : height === 4320 ? ' · 8K' : ''}`])];
   choices.forEach(([value,label]) => $('quality').add(new Option(label,value)));
-  const preferred=format==='mp3'?preferences.audioQuality:preferences.videoQuality;
+  const preferred=preferences.maximumQuality?(format==='mp3'?'320':'best'):(format==='mp3'?preferences.audioQuality:preferences.videoQuality);
   if(choices.some(([value])=>value===preferred))$('quality').value=preferred;
   document.querySelector('#download-button span').textContent = format === 'mp4' ? 'Scarica il video' : 'Scarica l’audio';
   setText('download-hint',!video?'Analizza un link per iniziare il download.':format==='mp4'&&!video.hasVideo?'Questo contenuto è solo audio. Scegli MP3.':format==='mp3'&&!video.hasAudio?'Questo contenuto non ha una traccia audio.':preferences.askWhereToSave?'Sceglierai dove salvare il file sul computer.':'Il file sarà salvato nella cartella delle Impostazioni.');
@@ -47,6 +53,7 @@ $('link-form').addEventListener('submit',async event => {
   setBusy(true); video = null; $('result').hidden = true; $('video-preview').hidden = true;
   setText('inspect-button','Analisi in corso…');
   $('progress-panel').hidden = false; $('download-progress').removeAttribute('value');
+  $('download-metrics').hidden=true;
   setText('progress-label','Recupero delle informazioni…');
   setText('progress-note','Connessione alla piattaforma dal tuo computer.');
   try {
@@ -69,6 +76,7 @@ $('download-button').addEventListener('click',async () => {
   if (!video || busy) return;
   clearError(); setBusy(true); cancelled = false; $('result').hidden = true;
   $('progress-panel').hidden = false; $('download-progress').removeAttribute('value');
+  $('download-metrics').hidden=true;
   setText('progress-label',preferences.askWhereToSave?'Scegli dove salvare il file…':'Preparazione del download…'); setText('progress-note',preferences.askWhereToSave?'Il download inizierà dopo la scelta della cartella.':'Il file sarà salvato nella tua cartella preferita.');
   try {
     const saved = await invoke('download',{ format, quality: $('quality').value });
@@ -81,14 +89,23 @@ $('reveal-button').addEventListener('click',() => invoke('reveal').catch(error =
 $('help-button').addEventListener('click',() => $('help-dialog').showModal());
 $('close-help').addEventListener('click',() => $('help-dialog').close());
 $('thumbnail').addEventListener('error',()=>{if(!$('thumbnail').src.endsWith('/mark.svg'))$('thumbnail').src='./mark.svg';});
+$('enqueue-current').addEventListener('click',async()=>{
+  if(!video||busy)return;
+  try{const result=await invoke('addToQueue',{urls:[video.url],format,quality:$('quality').value});document.dispatchEvent(new CustomEvent('flusiva:queue-added',{detail:result}));}
+  catch(error){showError(error.message);}
+});
 if (api) {
   api.onProgress(progress => {
     if (cancelled) return;
     if (progress.phase === 'download') {
-      $('download-progress').value = progress.percent;
-      setText('progress-label',`Download in corso · ${Math.floor(progress.percent)}%`);
+      if(progress.percent===null)$('download-progress').removeAttribute('value');else $('download-progress').value=progress.percent;
+      $('download-metrics').hidden=false;
+      setText('metric-bytes',`${window.flusivaMetrics.bytes(progress.downloadedBytes)}${progress.totalBytes?` / ${progress.totalEstimated?'circa ':''}${window.flusivaMetrics.bytes(progress.totalBytes)}`:''}`);
+      setText('metric-speed',progress.speed===null?'—':`${window.flusivaMetrics.bytes(progress.speed)}/s`);
+      setText('metric-eta',window.flusivaMetrics.eta(progress.eta));
+      setText('progress-label',`Download in corso${progress.percent===null?'':` · ${Math.floor(progress.percent)}%`}`);
       setText('progress-note','Video e audio possono essere scaricati in tracce separate.');
-    } else { $('download-progress').removeAttribute('value'); setText('progress-label',format === 'mp3' ? 'Conversione in MP3…' : 'Unione di video e audio…'); setText('progress-note','Il tempo necessario dipende dal file e dal computer.'); }
+    } else { $('download-metrics').hidden=true; $('download-progress').removeAttribute('value'); setText('progress-label',progress.phase==='saving'?'Salvataggio del file…':format === 'mp3' ? 'Conversione in MP3…' : 'Unione di video e audio…'); setText('progress-note','Il tempo necessario dipende dal file e dal computer.'); }
   });
   invoke('about').then(info => { setText('version',`Flusiva ${info.version}`); setText('system-info',`${({win32:'Windows',darwin:'macOS',linux:'Linux'})[info.platform] || info.platform} · ${info.arch} · versione ${info.version}`); }).catch(() => {});
 } else { setText('download-hint','I download sono disponibili nell’app desktop Flusiva.'); }

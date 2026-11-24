@@ -28,7 +28,7 @@ test('integrazione downloader: progressi reali di protocollo e pulizia dopo il s
     }});
     const info = await downloader.inspect('https://youtu.be/BaW_jenozKc');
     const file = await downloader.download(info,'mp4','best',{onProgress:p=>updates.push(p)});
-    assert.match(file.path,/media.mp4$/);assert.deepEqual(updates,[{phase:'download',percent:42.5},{phase:'conversion',percent:null}]);
+    assert.match(file.path,/media.mp4$/);assert.equal(updates[0].phase,'download');assert.equal(updates[0].percent,42.5);assert.deepEqual(updates[1],{phase:'conversion',percent:null});
     await file.cleanup();assert.deepEqual(await readdir(tempRoot),[]);
   } finally {await rm(tempRoot,{recursive:true,force:true});}
 });

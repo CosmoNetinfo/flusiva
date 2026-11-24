@@ -1,6 +1,6 @@
 {
   "name": "flusiva",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Video MP4 e audio MP3 dalle tue piattaforme preferite, sul tuo computer.",
   "author": "CosmoNet",
   "private": true,
@@ -42,6 +42,10 @@
       {
         "from": "vendor",
         "to": "tools"
+      },
+      {
+        "from": "LICENSE",
+        "to": "LICENSE-Flusiva.txt"
       }
     ],
     "artifactName": "Flusiva-${version}-${os}-${arch}.${ext}",
@@ -78,5 +82,6 @@
       "hardenedRuntime": true
     },
     "publish": null
-  }
+  },
+  "license": "GPL-3.0-only"
 }

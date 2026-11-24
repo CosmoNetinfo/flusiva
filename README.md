@@ -4,6 +4,8 @@
 
 App desktop per scaricare **video MP4 e audio MP3 da YouTube, TikTok, Vimeo, Dailymotion e SoundCloud**, con interfaccia in italiano. Windows, Linux e macOS (Intel e Apple Silicon). Il computer dell'utente esegue download e conversione: nessun server remoto, account, hosting o database.
 
+Flusiva è gratuito e open source, distribuito con licenza [GNU GPL v3](LICENSE). La versione 0.3 aggiunge coda di download, velocità e tempo rimanente, controllo delle nuove versioni e modalità qualità massima.
+
 ![Interfaccia desktop di Flusiva](docs/images/flusiva-desktop.png)
 
 ## Scaricare l'app
@@ -29,7 +31,7 @@ Su Linux: rendere eseguibile l'AppImage (`chmod +x Flusiva-*.AppImage`) e avviar
 2. Selezionare **Video MP4** o **Solo audio MP3** e la qualità.
 3. Premere **Scarica** e scegliere dove salvare il file.
 
-Video: migliore combinazione di tracce MP4/M4A disponibile, senza ricodifica del video. Risoluzioni fino a 8K se fornite dalla sorgente; i codec più recenti possono richiedere un lettore aggiornato. MP3: 128, 192, 256 o 320 kbps, partendo dal migliore audio disponibile. La conversione MP3 è con perdita e non può aumentare la qualità della sorgente.
+Video: migliore sorgente video/audio disponibile, unita o rimuxata in MP4 senza ricodifica del video. Risoluzioni fino a 8K se fornite dalla sorgente; i codec più recenti possono richiedere un lettore aggiornato. MP3: 320 kbps in modalità qualità massima, oppure 128, 192, 256 o 320 kbps con scelta manuale. La conversione MP3 è con perdita e non può aumentare la qualità della sorgente.
 
 Un download alla volta, durata massima 6 ore, limite 8 GiB per singola traccia, timeout 2 ore. I file vengono preparati nello spazio temporaneo del sistema, copiati alla destinazione e rimossi al termine, in caso di errore o annullamento. Serve spazio per tracce, file finale e copia di salvataggio. Una chiusura forzata del processo può lasciare una cartella `flusiva-*` nella directory temporanea: si può rimuovere quando l'app è chiusa.
 
@@ -57,15 +59,47 @@ Aprire **Impostazioni** nella barra superiore. Le modifiche entrano in vigore co
 * **Chiedi sempre dove salvare:** attivo per impostazione iniziale. Disattivandolo, l'app usa la cartella scelta e aggiunge `(1)`, `(2)` e così via ai nomi già presenti, senza sovrascriverli.
 * **Apri la cartella al termine:** facoltativo, mostra il file appena pronto.
 * **Formato e qualità predefiniti:** MP4 o MP3, risoluzione massima e bitrate MP3. Il singolo download può usare una scelta diversa.
+* **Usa sempre la qualità massima:** attivo inizialmente, prevale sui limiti manuali. Video alla migliore risoluzione e frequenza disponibile; per MP3 si cerca la migliore sorgente audio esposta e si converte a 320 kbps. Disattivarlo per scegliere bitrate o risoluzioni inferiori.
 * **Aspetto:** tema chiaro, scuro o di sistema, con opzione per ridurre le animazioni. Viene rispettata anche la preferenza di movimento del sistema.
 * **Piattaforme e versione:** riepilogo dei formati, motore incluso e collegamento alle release ufficiali.
 * **Ripristina preferenze:** torna ai valori iniziali; non elimina i file scaricati.
+* **Controlla all’avvio:** facoltativo e inizialmente disattivato. Controlla le Release ufficiali GitHub senza inviare i link scaricati. Il controllo manuale è sempre disponibile.
 
 Le preferenze sono in `settings.json` nella cartella dati dell’app (`app.getPath('userData')`), con scrittura atomica. Nessun database o sincronizzazione online. Un file corrotto viene recuperato con valori iniziali. Le impostazioni scelte durante un download si applicano a quelli successivi.
 
 ![Impostazioni, tema chiaro](docs/images/settings-light.png)
 
 ![Impostazioni, tema scuro](docs/images/settings-dark.png)
+
+## Coda di download
+
+Aprire **Coda** nella barra superiore. Aggiungere il contenuto già analizzato con **Aggiungi alla coda**, oppure espandere **Aggiungi più link** e incollare un link per riga. Fino a 50 link per inserimento e 100 elementi complessivi, inclusi quelli terminati. I duplicati già in attesa con la stessa richiesta vengono saltati. Un batch contenente un link non valido viene rifiutato interamente, senza alterare la coda esistente.
+
+**Avvia coda** elabora un file alla volta. **Pausa coda** impedisce l’avvio del prossimo elemento e lascia terminare quello attuale; **Annulla file** lo interrompe. I file falliti o annullati possono essere ritentati singolarmente, ripartendo dall’inizio. Gli errori di un elemento non fermano quelli successivi. **Rimuovi terminati** libera spazio nell’elenco; **Annulla coda** ferma l’elemento corrente e annulla quelli in attesa.
+
+SoundCloud viene indicato come MP3 fin dall’inserimento, anche se il batch usa MP4. La modalità qualità massima si applica anche alla coda. Se è attiva la richiesta della destinazione, apparirà un selettore per ogni file; disattivarla nelle Impostazioni per usare la cartella preferita automaticamente. I file esistenti non vengono sovrascritti nel salvataggio automatico.
+
+La coda vive soltanto nella sessione: chiudere l’app la annulla, dopo un avviso. Non viene salvata una cronologia o un database. I download singoli e la coda non possono usare il motore contemporaneamente.
+
+![Coda di download](docs/images/queue.png)
+
+## Avanzamento e qualità
+
+Durante il trasferimento l’app mostra byte scaricati, dimensione prevista, velocità e tempo rimanente quando yt-dlp li fornisce. I dati si riferiscono alla **traccia corrente**: video e audio separati possono ricominciare la percentuale da zero. Le dimensioni stimate sono indicate come tali. Durante conversione e salvataggio non vengono inventate percentuali, velocità o tempi.
+
+La qualità massima seleziona la migliore sorgente esposta dal servizio, senza preferire un MP4 inferiore soltanto per il contenitore. FFmpeg unisce o rimuxa le tracce in MP4 senza promettere miglioramenti della sorgente. Il codec risultante può richiedere un lettore aggiornato. MP3 è una conversione con perdita: 320 kbps in uscita non rende una sorgente compressa lossless e non supera restrizioni di accesso della piattaforma.
+
+## Controllo delle nuove versioni
+
+In **Impostazioni → Aggiornamenti**, premere **Controlla aggiornamenti**. L’app confronta la propria versione con l’ultima Release stabile del repository ufficiale `CosmoNetinfo/flusiva`. Se disponibile, mostra **Apri la nuova Release** e un avviso nella barra superiore. Niente token GitHub, cookie dei servizi o telemetria; richieste simultanee sono condivise e l’esito è riusato brevemente per evitare controlli ripetuti.
+
+Il controllo all’avvio può essere attivato salvando le preferenze. L’installazione resta manuale: non vengono scaricati o eseguiti automaticamente installer, non viene aggiornato yt-dlp di nascosto e non è presente un sistema di aggiornamenti firmati. Il nuovo installer aggiorna anche gli strumenti inclusi.
+
+![Controllo aggiornamenti](docs/images/updates.png)
+
+## Spotify
+
+Spotify è stato rimandato su richiesta del proprietario. Non è abilitato come sorgente MP3. La Web API documenta i metadati e un eventuale `preview_url` di 30 secondi, deprecato e talvolta assente; non espone un MP3 completo. Flusiva non sostituisce silenziosamente un brano Spotify con audio proveniente da un altro servizio. [Documentazione ufficiale](https://developer.spotify.com/documentation/web-api/reference/get-track).
 
 ## Sviluppo
 
@@ -90,13 +124,13 @@ Test online facoltativo: `node scripts/online-smoke.cjs`. Scarica il cortometrag
 
 Sonde dei soli metadati: `node scripts/platform-smoke.cjs`. Controlla contenuti pubblici sulle cinque piattaforme senza scaricare i file multimediali e registra esiti e restrizioni in `test-results/platform-probes.json`. Un blocco remoto viene registrato come tale, non come successo.
 
-Compilare sul sistema di destinazione. GitHub Actions esegue automaticamente i controlli, il test d'avvio Electron e la compilazione su quattro runner nativi. I 19 test deterministici non contattano i servizi esterni. Il test Electron verifica anche navigazione, preferenze via IPC, rifiuto di valori non validi, ripristino e presenza delle cinque piattaforme, con profilo isolato. Prima di una release pubblica verificare un download MP4 e MP3 reale su ciascun sistema con un video autorizzato.
+Compilare sul sistema di destinazione. GitHub Actions esegue automaticamente i controlli, il test d'avvio Electron e la compilazione su quattro runner nativi. I 33 test deterministici non contattano i servizi esterni. Il test Electron verifica anche navigazione, preferenze via IPC, rifiuto di valori non validi, ripristino e presenza delle cinque piattaforme, con profilo isolato. Prima di una release pubblica verificare un download MP4 e MP3 reale su ciascun sistema con un video autorizzato.
 
 Per pubblicare gli installer creare e inviare un tag coerente con `package.json`:
 
 ```sh
-git tag v0.2.0
-git push origin v0.2.0
+git tag v0.3.0
+git push origin v0.3.0
 ```
 
 Il workflow pubblica una GitHub Release solo quando tutte e quattro le build riescono. Include `SHA256SUMS.txt`. Nessun workflow Pages è necessario.
@@ -107,11 +141,14 @@ Il workflow pubblica una GitHub Release solo quando tutte e quattro le build rie
 * `public/`: interfaccia locale HTML/CSS/JavaScript con CSP, senza script remoti, telemetria o server HTTP.
 * `core/platforms.cjs`: riconoscimento dei cinque servizi, link brevi, metadati comuni e opzioni dei formati.
 * `core/settings.cjs` e `core/files.cjs`: preferenze locali validate, aggiornamenti atomici e salvataggio senza sovrascrittura.
+* `core/queue.cjs`: coda seriale, pausa, annullamento, tentativi e deduplicazione.
+* `core/progress.cjs` e `core/quality.cjs`: dati del trasferimento e politica di qualità massima.
+* `core/updates.cjs`: confronto delle versioni e controllo delle Release stabili ufficiali.
 * `core/`: processi senza shell, avanzamento, annullamento e pulizia dei temporanei.
 * `scripts/prepare-tools.mjs`: dipendenze native e controllo di integrità.
 * `.github/workflows/build.yml`: test, installer e pubblicazione release.
 
-Copertine e contenuti sono richiesti direttamente alle piattaforme e ai loro CDN. Nessun link viene inviato a un servizio Flusiva. La pagina Impostazioni non genera richieste di rete; il collegamento alle release si apre nel browser soltanto al clic.
+Copertine e contenuti sono richiesti direttamente alle piattaforme e ai loro CDN. Nessun link viene inviato a un servizio Flusiva. Il controllo aggiornamenti contatta soltanto l’API pubblica GitHub quando richiesto o se l’utente ha attivato il controllo all’avvio. Il browser si apre solo al clic sul collegamento alle Release.
 
 Licenze dei componenti in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
@@ -119,7 +156,7 @@ Licenze dei componenti in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 Identità in blu, azzurro e bianco, con una F costruita da puntini. [Studio del logo e tre proposte](docs/BRAND.md), [tavola ad alta risoluzione](docs/brand/logo-study.png), [roadmap e piattaforme candidate](docs/ROADMAP.md), [note di rilascio](CHANGELOG.md) e [verifiche della versione](docs/VALIDATION.md).
 
-La versione 0.2.0 implementa TikTok, Vimeo, Dailymotion e SoundCloud. La roadmap mantiene Instagram, firma digitale, aggiornamenti verificati e coda di download fra le evoluzioni future.
+La versione 0.2.0 implementa TikTok, Vimeo, Dailymotion e SoundCloud; la 0.3.0 aggiunge coda, dati di avanzamento, qualità massima e controllo delle versioni. Restano in roadmap Instagram, firma digitale, aggiornamenti installabili verificati e ripresa dei file parziali. Spotify è rimandato.
 
 ## Risolvere un problema
 
@@ -134,3 +171,15 @@ La versione 0.2.0 implementa TikTok, Vimeo, Dailymotion e SoundCloud. La roadmap
 | Antivirus o Gatekeeper mostrano un avviso | Le prime release sono prive di firma dell’editore; verificare provenienza e checksum. La firma è prevista in roadmap |
 
 Per una segnalazione aprire una [issue](https://github.com/CosmoNetinfo/flusiva/issues) con sistema, architettura, versione e messaggio di errore. Non allegare cookie, password o link privati. Per i formati, indicare un video pubblico che si ha il permesso di utilizzare.
+
+## Uso responsabile
+
+Flusiva è un programma gratuito e open source, pensato per scaricare contenuti propri, liberi da diritti (ad esempio con licenza Creative Commons o di pubblico dominio) o per i quali l'uso personale è consentito dalla legge.
+
+Scaricare contenuti protetti da diritto d'autore senza il permesso del titolare, o in violazione dei termini di servizio delle piattaforme, può non essere consentito. Ogni utente è l'unico responsabile dell'uso che fa del programma e del rispetto delle leggi e delle condizioni d'uso del proprio Paese e dei siti da cui scarica.
+
+Flusiva non ospita, non distribuisce e non memorizza alcun contenuto: tutto avviene sul computer di chi lo usa. Il programma è fornito "così com'è", senza garanzie, e gli autori non rispondono dell'uso che ne viene fatto.
+
+## Licenza
+
+Copyright © 2026 CosmoNet. Il codice di Flusiva è distribuito con licenza **GPL-3.0-only**; il testo integrale è in [LICENSE](LICENSE) ed è incluso negli installer. Electron, yt-dlp, FFmpeg, FFprobe e le relative dipendenze conservano le proprie licenze, descritte in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

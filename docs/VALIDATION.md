@@ -1,5 +1,16 @@
 # Verifiche della prima versione
 
+## Estensione 0.3.0
+
+* 33 test deterministici: includono serializzazione della coda, continuazione dopo errore, annullamento, pausa, tentativi, deduplicazione, limiti e validazione atomica dei batch, MP3 SoundCloud, dati di avanzamento mancanti/stimati, politica qualità massima e controllo sicuro delle Release stabili.
+* Test Electron reale: batch inserito dal modulo della UI, lettura IPC, rifiuto dei link non ammessi, annullamento e nuovo tentativo, svuotamento e presenza dei controlli Aggiornamenti. Nessuna rete nei test CI; profilo isolato.
+* Prova online: il confronto con l’ultima Release GitHub ha restituito correttamente 0.2.0 durante lo sviluppo della 0.3.0.
+* Download reale del video Creative Commons di prova: rilevati byte, velocità, ETA e formato della traccia in 27 campioni; file temporanei rimossi.
+* Selezione qualità massima senza download del video intero: risoluzione selezionata 2160p, uguale alla massima risoluzione disponibile.
+* Download SoundCloud reale con conversione MP3: FFprobe ha verificato codec MP3 e bitrate in uscita 320.000 bit/s. Non è una misura della fedeltà della sorgente.
+* TikTok e Vimeo conservano le limitazioni documentate in PLATFORMS.md. Spotify non viene implementato nella 0.3.0, come richiesto dal proprietario.
+* Screenshot reali della coda con elementi in attesa e delle nuove Impostazioni, senza risultati di download simulati.
+
 ## Estensione 0.2.0
 
 * 19 test deterministici: includono ora cinque piattaforme, redirect sicuri e limitati, immagini CDN, contenuti audio-only, preferenze persistenti dopo riapertura, aggiornamenti concorrenti, recupero da JSON corrotto e salvataggi senza sovrascrittura.

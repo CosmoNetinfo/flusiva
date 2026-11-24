@@ -1,7 +1,8 @@
 (() => {
   const el=id=>document.getElementById(id);
   let saved=null,draftDirectory=null,initializing=true;
-  const fields={defaultFormat:'default-format',videoQuality:'default-video-quality',audioQuality:'default-audio-quality',theme:'app-theme',askWhereToSave:'ask-where',openFolderAfterDownload:'open-folder',reduceMotion:'reduce-motion'};
+  const fields={defaultFormat:'default-format',videoQuality:'default-video-quality',audioQuality:'default-audio-quality',theme:'app-theme',askWhereToSave:'ask-where',openFolderAfterDownload:'open-folder',reduceMotion:'reduce-motion',checkUpdatesOnStartup:'check-updates-startup',maximumQuality:'maximum-quality'};
+  document.querySelector('.settings-actions').before(el('settings-updates'));
   const systemTheme=matchMedia('(prefers-color-scheme: dark)');
   function appearance(preferences) {
     const theme=preferences.theme==='system'?(systemTheme.matches?'dark':'light'):preferences.theme;
@@ -16,6 +17,8 @@
     el('download-directory').value=preferences.downloadDirectory;
     appearance(preferences);
     document.dispatchEvent(new CustomEvent('flusiva:preferences',{detail:preferences}));
+    el('default-video-quality').disabled=preferences.maximumQuality;
+    el('default-audio-quality').disabled=preferences.maximumQuality;
   }
   function status(message,failed=false) {
     el('settings-status').textContent=message;el('settings-status').classList.toggle('error',failed);
@@ -40,6 +43,8 @@
     if(initializing)return;
     status('Modifiche da salvare');
     appearance(draft());
+    el('default-video-quality').disabled=el('maximum-quality').checked;
+    el('default-audio-quality').disabled=el('maximum-quality').checked;
   });
   systemTheme.addEventListener('change',()=>{if(saved)appearance(el('settings-view').hidden?saved:draft());});
   el('settings-form').addEventListener('submit',async event=>{
