@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 — 2026-11-24
+
+* Corretto il test CI su Linux: configura il sandbox helper con proprietario e permessi corretti.
+* I test CI verificano interfaccia, bridge e binari senza richiedere screenshot a un compositor virtuale. Gli screenshot di documentazione restano acquisiti localmente dall’app reale.
+* Conservati i controlli della sandbox; nessun uso di `--no-sandbox`.
+
 ## 0.1.0 — 2026-11-24
 
 Prima versione desktop di Flusiva.

@@ -1,6 +1,6 @@
 {
   "name": "flusiva",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Scarica video MP4 e audio MP3 da YouTube sul tuo computer.",
   "author": "CosmoNet",
   "private": true,
@@ -28,14 +28,55 @@
     "productName": "Flusiva",
     "copyright": "Copyright © 2026 CosmoNet",
     "asar": true,
-    "directories": { "output": "release" },
-    "files": ["desktop/**/*", "core/**/*", "public/**/*", "build/icon.png", "package.json"],
-    "extraResources": [{ "from": "vendor", "to": "tools" }],
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "desktop/**/*",
+      "core/**/*",
+      "public/**/*",
+      "build/icon.png",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "vendor",
+        "to": "tools"
+      }
+    ],
     "artifactName": "Flusiva-${version}-${os}-${arch}.${ext}",
-    "win": { "target": ["nsis"], "icon": "build/icon.ico", "signExecutable": false },
-    "nsis": { "oneClick": false, "perMachine": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true },
-    "linux": { "target": ["AppImage", "deb"], "category": "AudioVideo", "icon": "build/icon.png", "maintainer": "CosmoNet", "synopsis": "Video MP4 e audio MP3 da YouTube" },
-    "mac": { "target": ["dmg", "zip"], "category": "public.app-category.video", "icon": "build/icon.png", "hardenedRuntime": true },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icon.ico",
+      "signExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "AudioVideo",
+      "icon": "build/icon.png",
+      "maintainer": "CosmoNet",
+      "synopsis": "Video MP4 e audio MP3 da YouTube"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.video",
+      "icon": "build/icon.png",
+      "hardenedRuntime": true
+    },
     "publish": null
   }
 }

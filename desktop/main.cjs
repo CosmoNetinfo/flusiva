@@ -78,13 +78,15 @@ else {
           for (const binary of ['yt-dlp','ffmpeg','ffprobe']) execFileSync(join(tools,binary+(process.platform === 'win32' ? '.exe' : '')),[binary === 'yt-dlp' ? '--version' : '-version'],{windowsHide:true,timeout:15_000,stdio:'pipe'});
           const runtime = execFileSync(process.execPath,['--version'],{env:{...process.env,ELECTRON_RUN_AS_NODE:'1'},windowsHide:true,encoding:'utf8',timeout:15_000});
           if (!/^v\d+\./.test(runtime)) throw new Error('Runtime Node non disponibile.');
-          const shots = app.isPackaged ? join(app.getPath('temp'),'flusiva-smoke') : join(__dirname,'../test-results');
-          await require('node:fs/promises').mkdir(shots,{recursive:true});
-          await new Promise(resolve => setTimeout(resolve,800));
-          await require('node:fs/promises').writeFile(join(shots,'desktop.png'),(await window.webContents.capturePage()).toPNG());
-          if (process.argv.includes('--brand-study') && !app.isPackaged) {
+          if (process.env.CI !== 'true') {
+            const shots = app.isPackaged ? join(app.getPath('temp'),'flusiva-smoke') : join(__dirname,'../test-results');
+            await require('node:fs/promises').mkdir(shots,{recursive:true});
+            await new Promise(resolve => setTimeout(resolve,800));
+            await require('node:fs/promises').writeFile(join(shots,'desktop.png'),(await window.webContents.capturePage()).toPNG());
+          }
+          if (process.argv.includes('--brand-study') && !app.isPackaged && process.env.CI !== 'true') {
             await require('node:fs/promises').mkdir(join(__dirname,'../docs/images'),{recursive:true});
-            await require('node:fs/promises').copyFile(join(shots,'desktop.png'),join(__dirname,'../docs/images/flusiva-desktop.png'));
+            await require('node:fs/promises').copyFile(join(__dirname,'../test-results/desktop.png'),join(__dirname,'../docs/images/flusiva-desktop.png'));
             window.setContentSize(1440,1000);
             await window.loadFile(join(__dirname,'../docs/brand/study.html'));
             await require('node:fs/promises').writeFile(join(__dirname,'../docs/brand/logo-study.png'),(await window.webContents.capturePage()).toPNG());

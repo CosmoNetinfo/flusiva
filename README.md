@@ -61,8 +61,8 @@ Compilare sul sistema di destinazione. GitHub Actions esegue automaticamente i c
 Per pubblicare gli installer creare e inviare un tag coerente con `package.json`:
 
 ```sh
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.1.1
+git push origin v0.1.1
 ```
 
 Il workflow pubblica una GitHub Release solo quando tutte e quattro le build riescono. Include `SHA256SUMS.txt`. Nessun workflow Pages è necessario.

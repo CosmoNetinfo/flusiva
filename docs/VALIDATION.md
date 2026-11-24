@@ -15,6 +15,8 @@ GATE: ERROR — i controlli della skill grafica basati su Chrome non sono partit
 
 Il workflow testa ogni build con Electron e i binari della piattaforma prima di produrre gli installer. Su Ubuntu il runner configura proprietario e permessi del sandbox helper Chromium; la sandbox resta attiva.
 
+La build 0.1.0 ha evidenziato anche un errore `UnknownVizError` durante `capturePage` nel display virtuale Linux. Da 0.1.1 gli screenshot sono un passaggio locale di documentazione, separato dal test CI: i controlli DOM, IPC e binari restano obbligatori su tutti i runner.
+
 Le build macOS sono separate per Intel e Apple Silicon. Non è stata verificata l’installazione interattiva su macchine pulite macOS/Linux in questa sessione. La compilazione e il test d’avvio non sostituiscono questa verifica. Le prime build non sono firmate né notarizzate.
 
 ## Verifica visiva e scelte
