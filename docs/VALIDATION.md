@@ -2,6 +2,8 @@
 
 ## Estensione 0.4.1
 
+* Release v0.4.1 pubblicata dopo build riuscite su Windows x64, Linux x64, Mac Intel e Mac Apple Silicon. Su Linux un HTTP 504 del servizio di download yt-dlp ha richiesto la riesecuzione del job, poi completato.
+* Verifica online con NsisUpdater reale e HTTP Electron: rilevata la Release ufficiale 0.4.1, scaricato l’installer Windows completo (189.327.957 byte), superata la verifica nativa SHA-512 e ricevuto l’evento update-downloaded. Cache e profilo isolati; installazione e riavvio disabilitati nel test. Esito locale in test-results/native-update.json.
 * 41 test deterministici superati: 8 nuovi controlli per capacità dei sistemi, download automatico/manuale, verifica fallita, deduplicazione richieste, blocco con coda attiva, Debian e fallback Mac non firmato.
 * Preparazione feed verificata con checksum dei file effettivi, entrambe le architetture Mac e selezione architettura della classe reale MacUpdater.
 * Test Electron esteso ai nuovi controlli, lettura stato via IPC e rifiuto installazione quando non pronta. Il profilo di test disabilita gli aggiornamenti nativi.
