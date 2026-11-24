@@ -1,0 +1,16 @@
+# Changelog
+
+## 0.1.0 — 2026-11-24
+
+Prima versione desktop di Flusiva.
+
+* Download da un singolo link YouTube, inclusi link brevi, Shorts e YouTube Music.
+* MP4 alla migliore risoluzione disponibile o risoluzione massima scelta, con video e audio uniti localmente.
+* MP3 a 128, 192, 256 o 320 kbps.
+* Anteprima del video, selezione della destinazione, avanzamento, annullamento e apertura della cartella.
+* Elaborazione locale con yt-dlp, FFmpeg, FFprobe e runtime Node inclusi.
+* Renderer isolato, processi senza shell e pulizia dei temporanei.
+* Identità blu/azzurro/bianco e logo puntinato, con studio delle alternative.
+* Build GitHub Actions per Windows x64, Linux x64 e macOS Intel/Apple Silicon.
+
+Limiti: niente playlist, live, login, aggiornamento automatico, altre piattaforme o certificati di firma. Qualità limitata alla sorgente; la conversione MP3 non ripristina dettagli persi.

@@ -57,8 +57,8 @@ else {
     handle('file:reveal', () => { if (lastSaved) shell.showItemInFolder(lastSaved); });
     handle('app:about', () => ({ version: app.getVersion(), platform: process.platform, arch: process.arch }));
     function createWindow() {
-      const smoke = process.argv.includes('--smoke-test');
-      window = new BrowserWindow({ show: !smoke, width: 1120, height: 830, minWidth: 760, minHeight: 680, backgroundColor: '#f8f8f8', title: 'Flusiva', autoHideMenuBar: true, icon: join(__dirname,'../build/icon.png'), webPreferences: { preload: join(__dirname,'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true } });
+      const smoke = process.argv.includes('--smoke-test') || process.argv.includes('--brand-study');
+      window = new BrowserWindow({ show: !smoke, width: 1160, height: 900, minWidth: 760, minHeight: 680, backgroundColor: '#f7faff', title: 'Flusiva', autoHideMenuBar: true, icon: join(__dirname,'../build/icon.png'), webPreferences: { preload: join(__dirname,'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true } });
       window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
       window.webContents.on('will-navigate', event => event.preventDefault());
       window.on('close', event => {
@@ -82,6 +82,13 @@ else {
           await require('node:fs/promises').mkdir(shots,{recursive:true});
           await new Promise(resolve => setTimeout(resolve,800));
           await require('node:fs/promises').writeFile(join(shots,'desktop.png'),(await window.webContents.capturePage()).toPNG());
+          if (process.argv.includes('--brand-study') && !app.isPackaged) {
+            await require('node:fs/promises').mkdir(join(__dirname,'../docs/images'),{recursive:true});
+            await require('node:fs/promises').copyFile(join(shots,'desktop.png'),join(__dirname,'../docs/images/flusiva-desktop.png'));
+            window.setContentSize(1440,1000);
+            await window.loadFile(join(__dirname,'../docs/brand/study.html'));
+            await require('node:fs/promises').writeFile(join(__dirname,'../docs/brand/logo-study.png'),(await window.webContents.capturePage()).toPNG());
+          }
           console.log(`Flusiva smoke PASS: bridge isolato, interfaccia, tre binari, runtime ${runtime.trim()}`);
           clearTimeout(timer); app.exit(0);
         }).catch(error => { console.error(error); app.exit(1); });

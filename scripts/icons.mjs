@@ -7,11 +7,11 @@ function chunk(name,data) { const type = Buffer.from(name); const len=Buffer.all
 function segment(x,y,ax,ay,bx,by) { const dx=bx-ax,dy=by-ay;const t=Math.max(0,Math.min(1,((x-ax)*dx+(y-ay)*dy)/(dx*dx+dy*dy)));return Math.hypot(x-ax-t*dx,y-ay-t*dy); }
 for(let y=0;y<n;y++) for(let x=0;x<n;x++) {
   const px=x/8,py=y/8;const cx=Math.max(19,Math.min(45,px)),cy=Math.max(19,Math.min(45,py));
-  const inside=Math.hypot(px-cx,py-cy)<=19;
-  const curved=px<=31&&py<=26&&Math.abs(Math.hypot(px-31,py-26)-9)<=3;
-  const white=segment(px,py,22,26,22,45)<=3||segment(px,py,31,17,44,17)<=3||segment(px,py,22,31,39,31)<=3||curved;
+  const inside=Math.hypot(px-cx,py-cy)<=18;
+  const white=[[20,19],[32,19],[20,31],[32,31],[20,43]].some(([ax,ay])=>Math.hypot(px-ax,py-ay)<=4.5);
+  const cyan=Math.hypot(px-44,py-19)<=4.5||Math.hypot(px-44,py-43)<=2.5;
   const offset=y*(n*4+1)+1+x*4;
-  image[offset]=white?255:31;image[offset+1]=white?255:107;image[offset+2]=white?255:58;image[offset+3]=inside?255:0;
+  image[offset]=white?255:cyan?117:23;image[offset+1]=white?255:cyan?209:97;image[offset+2]=white?255:cyan?255:232;image[offset+3]=inside?255:0;
 }
 const header=Buffer.alloc(13);header.writeUInt32BE(n,0);header.writeUInt32BE(n,4);header[8]=8;header[9]=6;
 const png=Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),chunk('IHDR',header),chunk('IDAT',deflateSync(image)),chunk('IEND',Buffer.alloc(0))]);

@@ -1,4 +1,4 @@
-// Optional manual integration check against yt-dlp's public test video.
+// Optional manual integration check against Blender's Creative Commons short film.
 const { createDownloader } = require('../core/downloader.cjs');
 const { join } = require('node:path');
 const { tmpdir } = require('node:os');
@@ -9,7 +9,7 @@ async function main() {
   const exe = process.platform === 'win32' ? '.exe' : '';
   const electron = require('electron');
   const downloader = createDownloader({toolsDir:tools,tempRoot:tmpdir(),nodePath:electron});
-  const info = await downloader.inspect('https://www.youtube.com/watch?v=BaW_jenozKc');
+  const info = await downloader.inspect(process.argv[2] || 'https://www.youtube.com/watch?v=aqz-KE-bpKQ');
   console.log(`Video test: ${info.title}, ${info.duration}s`);
   for (const [format,quality] of [['mp4','360'],['mp3','320']]) {
     const result = await downloader.download(info,format,quality);

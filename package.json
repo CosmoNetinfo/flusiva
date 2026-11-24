@@ -20,6 +20,9 @@
     "ffmpeg-static": "5.3.0",
     "@ffprobe-installer/ffprobe": "2.1.2"
   },
+  "overrides": {
+    "minimatch@>=7.0.0 <11.0.1": "11.0.1"
+  },
   "build": {
     "appId": "info.cosmonet.flusiva",
     "productName": "Flusiva",
@@ -29,7 +32,7 @@
     "files": ["desktop/**/*", "core/**/*", "public/**/*", "build/icon.png", "package.json"],
     "extraResources": [{ "from": "vendor", "to": "tools" }],
     "artifactName": "Flusiva-${version}-${os}-${arch}.${ext}",
-    "win": { "target": ["nsis"], "icon": "build/icon.ico", "signAndEditExecutable": false },
+    "win": { "target": ["nsis"], "icon": "build/icon.ico", "signExecutable": false },
     "nsis": { "oneClick": false, "perMachine": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true },
     "linux": { "target": ["AppImage", "deb"], "category": "AudioVideo", "icon": "build/icon.png", "maintainer": "CosmoNet", "synopsis": "Video MP4 e audio MP3 da YouTube" },
     "mac": { "target": ["dmg", "zip"], "category": "public.app-category.video", "icon": "build/icon.png", "hardenedRuntime": true },

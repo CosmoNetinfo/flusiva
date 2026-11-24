@@ -47,11 +47,14 @@ const licenseResponse = await fetch(`https://raw.githubusercontent.com/yt-dlp/yt
 if (!licenseResponse.ok) throw new Error('Impossibile includere le licenze di yt-dlp.');
 await writeFile(join(licenses,'yt-dlp-THIRD_PARTY_LICENSES.txt'),await licenseResponse.text());
 await copyFile(join(root,'THIRD_PARTY_NOTICES.md'),join(licenses,'THIRD_PARTY_NOTICES.md'));
+const versions = { platform:process.platform,arch:process.arch,ytDlp:release };
+await copyFile(join(dirname(ffmpegPath),'LICENSE'),join(licenses,'GPL-3.0.txt'));
 for (const name of [`yt-dlp${exe}`,`ffmpeg${exe}`,`ffprobe${exe}`]) {
   if (!exe) await chmod(join(vendor,name),0o755);
   const args = name.startsWith('yt-dlp') ? ['--version'] : ['-version'];
   const output = execFileSync(join(vendor,name),args,{ encoding:'utf8',windowsHide:true,timeout:30_000,env:{...process.env,ELECTRON_RUN_AS_NODE:'1'} });
   console.log(`${name}: ${output.split(/\r?\n/)[0]}`);
+  versions[name.replace('.exe','')] = output.split(/\r?\n/)[0];
 }
-await writeFile(join(vendor,'versions.json'),JSON.stringify({ platform:process.platform,arch:process.arch,ytDlp:release,ffmpeg:'6.1.1',ffprobe:ffprobe.version },null,2));
+await writeFile(join(vendor,'versions.json'),JSON.stringify(versions,null,2));
 console.log('Strumenti pronti.');
