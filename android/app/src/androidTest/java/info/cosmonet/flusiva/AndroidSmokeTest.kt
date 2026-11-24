@@ -1,6 +1,7 @@
 package info.cosmonet.flusiva
 
 import android.content.Intent
+import android.content.ContentValues
 import android.provider.MediaStore
 import android.media.MediaMetadataRetriever
 import androidx.test.platform.app.InstrumentationRegistry
@@ -19,6 +20,14 @@ import java.io.File
 class AndroidSmokeTest {
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()
     private val context get() = instrumentation.targetContext
+    private fun capture(device: UiDevice, name: String) {
+        val file = File(context.cacheDir, name)
+        check(device.takeScreenshot(file)) { "Screenshot non disponibile" }
+        val values = ContentValues().apply { put(MediaStore.Downloads.DISPLAY_NAME, name); put(MediaStore.Downloads.MIME_TYPE, "image/png"); put(MediaStore.Downloads.RELATIVE_PATH, "Download/Flusiva-tests") }
+        val uri = context.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)!!
+        context.contentResolver.openOutputStream(uri)!!.use { output -> file.inputStream().use { it.copyTo(output) } }
+        file.delete()
+    }
     @Test fun nativeEngineAndStorageWork() {
         Engine.initialize(context)
         val version = YoutubeDL.execute(YoutubeDLRequest(emptyList()).addOption("--version")).out.trim()
@@ -52,17 +61,16 @@ class AndroidSmokeTest {
         val device = UiDevice.getInstance(instrumentation)
         device.wakeUp(); device.executeShellCommand("wm dismiss-keyguard")
         context.startActivity(Intent(context, MainActivity::class.java).setAction(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, "Guarda https://youtu.be/aqz-KE-bpKQ").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
-        val images = File(context.getExternalFilesDir(null), "screenshots").apply { mkdirs() }
         device.wait(Until.hasObject(By.pkg(context.packageName)), 10000)
-        device.takeScreenshot(File(images, "android-startup.png")); device.dumpWindowHierarchy(File(images, "android-startup.xml"))
+        capture(device, "android-startup.png")
         assertNotNull(device.wait(Until.findObject(By.text("Analizza il link")), 10000))
         assertNotNull(device.findObject(By.text("https://youtu.be/aqz-KE-bpKQ")))
-        device.takeScreenshot(File(images, "android-download.png"))
+        capture(device, "android-download.png")
         device.findObject(By.text("Impostazioni")).click()
         assertNotNull(device.wait(Until.findObject(By.text("Usa la qualità massima")), 5000))
         device.findObject(By.text("Usa la qualità massima")).click()
         assertFalse(Preferences(context).maximum)
-        device.takeScreenshot(File(images, "android-settings.png"))
+        capture(device, "android-settings.png")
         Preferences(context).reset()
     }
 }

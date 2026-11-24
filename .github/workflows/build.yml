@@ -154,11 +154,6 @@ jobs:
           cp android/app/build/outputs/apk/release/app-release.apk "android-installers/Flusiva-$version-android.apk"
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "android-installers/Flusiva-$version-android.apk"
           echo 'signed=true' >> "$GITHUB_OUTPUT"
-      - name: Collect Android screenshots
-        if: always()
-        run: |
-          mkdir -p android-test-results
-          adb pull /sdcard/Android/data/info.cosmonet.flusiva/files/screenshots android-test-results/ || true
       - uses: actions/upload-artifact@v4
         if: always()
         with:

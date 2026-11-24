@@ -6,6 +6,7 @@
 * Verificata la presenza delle architetture ARM64, ARMv7 e x86_64, minSdk 29 e targetSdk 36 nell’APK.
 * GitHub Actions aggiunge test su emulatore Android 15 per motore nativo, QuickJS, FFmpeg/MP3 e MP4 con audio, MediaStore, annullamento del salvataggio, link condivisi e Impostazioni. Gli esiti della CI vengono verificati prima della pubblicazione.
 * 41 test desktop superati anche dopo l’aggiunta dell’APK alla preparazione dei checksum della Release.
+* I 2 test su emulatore Android 15 sono riusciti nelle Actions: avvio e link condiviso, preferenze, Python/yt-dlp 2026.11.23, QuickJS, MP4 con video/audio, estrazione MP3 con yt-dlp e FFmpeg, MediaStore e salvataggio annullato. Firma APK verificata con lo stesso certificato documentato per le installazioni future.
 * Le prove Android non dimostrano un download online riuscito da tutte le piattaforme su tutti i telefoni. Test sui dispositivi fisici e sulle reti degli utenti ancora necessari.
 
 ## Estensione 0.4.1
