@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="it" data-type="software" data-radius="soft">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https://i.ytimg.com; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="description" content="Flusiva scarica video MP4 e audio MP3 da YouTube direttamente sul tuo computer.">
+  <meta name="page-type" content="software"><meta name="site-kind" content="software">
+  <title>Flusiva — Video e audio da YouTube</title>
+  <link rel="icon" href="./mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#top">Vai al contenuto</a>
+  <header class="topbar">
+    <div class="brand"><img src="./mark.svg" alt="" width="36" height="36"><span>flusiva<span class="brand-dot">.</span></span></div>
+    <span class="desktop-label">Il download, sul tuo computer</span>
+    <button class="icon-button" id="help-button" aria-label="Apri le informazioni su Flusiva" title="Informazioni">?</button>
+  </header>
+  <main id="top">
+    <div class="intro" data-enter>
+      <span class="eyebrow">Da YouTube ai tuoi file</span>
+      <h1>Il tuo video.<br>O solo l’audio.</h1>
+      <p>Incolla un link, scegli il formato e salva.<br>Alla migliore qualità disponibile.</p>
+    </div>
+    <section class="workspace app-frame" aria-label="Download da YouTube" data-enter>
+      <form id="link-form" novalidate>
+        <label for="video-url">Link di YouTube</label>
+        <div class="url-row">
+          <div class="input-wrap"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2"/></svg><input type="url" id="video-url" placeholder="https://www.youtube.com/watch?v=…" autocomplete="off" spellcheck="false" maxlength="2048" aria-describedby="url-error"><button type="button" id="paste-button" class="paste-button">Incolla</button></div>
+          <button type="submit" class="button secondary" id="inspect-button">Analizza il link</button>
+        </div>
+        <p id="url-error" class="error" role="alert" hidden></p>
+      </form>
+      <div id="video-preview" class="video-preview" hidden>
+        <img id="thumbnail" alt="" width="144" height="81" referrerpolicy="no-referrer">
+        <div class="video-description"><span id="video-channel" class="small"></span><h2 id="video-title"></h2><span id="video-duration" class="small"></span></div>
+      </div>
+      <div class="format-section">
+        <span class="field-label" id="format-label">Cosa vuoi scaricare?</span>
+        <div class="format-options" role="group" aria-labelledby="format-label">
+          <button type="button" class="format-option selected" data-format="mp4" aria-pressed="true"><span class="file-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3Z"/></svg></span><span><strong>Video</strong><span class="small">MP4 · immagine e audio</span></span><span class="radio-mark" aria-hidden="true"></span></button>
+          <button type="button" class="format-option" data-format="mp3" aria-pressed="false"><span class="file-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17V5l11-2v12M9 8l11-2"/><ellipse cx="6" cy="17" rx="3" ry="3"/><ellipse cx="17" cy="15" rx="3" ry="3"/></svg></span><span><strong>Solo audio</strong><span class="small">MP3 · musica e voce</span></span><span class="radio-mark" aria-hidden="true"></span></button>
+        </div>
+      </div>
+      <div class="quality-row"><div><label for="quality">Qualità del video</label><p id="quality-note" class="small">La risoluzione dipende dal video originale.</p></div><div class="select-wrap"><select id="quality"><option value="best">Migliore disponibile</option></select><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg></div></div>
+      <div class="download-area">
+        <button type="button" id="download-button" class="button primary" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg><span>Scarica il video</span></button>
+        <p id="download-hint" class="small">Analizza un link per iniziare il download.</p>
+      </div>
+      <div id="progress-panel" class="progress-panel" hidden>
+        <div class="progress-heading"><span id="progress-label">Preparazione del download…</span><button id="cancel-button" class="text-button" type="button">Annulla</button></div>
+        <progress id="download-progress" max="100" aria-label="Avanzamento del download"></progress>
+        <p class="small" id="progress-note">Puoi continuare a usare il computer.</p>
+      </div>
+      <div id="result" class="result" role="status" aria-live="polite" hidden><div><strong id="result-title"></strong><p id="result-message"></p></div><button class="button secondary" id="reveal-button" hidden>Mostra nella cartella</button></div>
+    </section>
+    <div class="local-note"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><span>Elaborato sul tuo computer. I tuoi file restano tuoi.</span></div>
+  </main>
+  <footer><span id="version">Flusiva</span><span>YouTube · MP4 e MP3</span></footer>
+  <dialog id="help-dialog"><div class="dialog-heading"><h2>Informazioni su Flusiva</h2><button class="icon-button" id="close-help" aria-label="Chiudi le informazioni">×</button></div><p>Flusiva scarica un video alla volta. Scegli il formato, poi la cartella in cui salvarlo.</p><p>Il video conserva la migliore qualità MP4 disponibile. L’audio può essere convertito in MP3 fino a 320 kbps: la conversione non migliora la qualità originale.</p><p>Download e conversione avvengono su questo computer. Serve una connessione a Internet per recuperare i contenuti da YouTube.</p><p>Usa Flusiva per contenuti tuoi o che hai il permesso di scaricare. Le dirette e i video che richiedono l’accesso non sono supportati.</p><p class="small" id="system-info"></p></dialog>
+</body>
+</html>

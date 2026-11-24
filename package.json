@@ -1,0 +1,38 @@
+{
+  "name": "flusiva",
+  "version": "0.1.0",
+  "description": "Scarica video MP4 e audio MP3 da YouTube sul tuo computer.",
+  "author": "CosmoNet",
+  "private": true,
+  "main": "desktop/main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "setup": "node scripts/prepare-tools.mjs && node node_modules/electron/install.js",
+    "prepare:tools": "node scripts/prepare-tools.mjs",
+    "test": "node --test tests/*.test.cjs",
+    "check": "node scripts/check.mjs",
+    "pack": "electron-builder --dir --publish never",
+    "dist": "electron-builder --publish never"
+  },
+  "devDependencies": {
+    "electron": "45.4.1",
+    "electron-builder": "26.18.0",
+    "ffmpeg-static": "5.3.0",
+    "@ffprobe-installer/ffprobe": "2.1.2"
+  },
+  "build": {
+    "appId": "info.cosmonet.flusiva",
+    "productName": "Flusiva",
+    "copyright": "Copyright © 2026 CosmoNet",
+    "asar": true,
+    "directories": { "output": "release" },
+    "files": ["desktop/**/*", "core/**/*", "public/**/*", "build/icon.png", "package.json"],
+    "extraResources": [{ "from": "vendor", "to": "tools" }],
+    "artifactName": "Flusiva-${version}-${os}-${arch}.${ext}",
+    "win": { "target": ["nsis"], "icon": "build/icon.ico", "signAndEditExecutable": false },
+    "nsis": { "oneClick": false, "perMachine": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true },
+    "linux": { "target": ["AppImage", "deb"], "category": "AudioVideo", "icon": "build/icon.png", "maintainer": "CosmoNet", "synopsis": "Video MP4 e audio MP3 da YouTube" },
+    "mac": { "target": ["dmg", "zip"], "category": "public.app-category.video", "icon": "build/icon.png", "hardenedRuntime": true },
+    "publish": null
+  }
+}

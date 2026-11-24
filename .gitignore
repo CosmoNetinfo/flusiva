@@ -1,0 +1,10 @@
+node_modules/
+vendor/
+release/
+.venv/
+.taste-skill/
+shots/
+test-results/
+*.log
+.DS_Store
+.env
