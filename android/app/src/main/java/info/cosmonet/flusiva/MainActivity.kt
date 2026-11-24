@@ -73,7 +73,7 @@ class MainActivity : ComponentActivity() {
     private fun showPage(showSettings: Boolean) {
         if (::link.isInitialized && !settings) draft = link.text.toString()
         settings = showSettings
-        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(pale) }
+        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(pale); isFocusableInTouchMode = true }
         ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets -> val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime()); view.setPadding(bars.left, bars.top, bars.right, bars.bottom); insets }
         val bar = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL; setPadding(dp(22), dp(10), dp(22), dp(10)) }
         bar.addView(ImageView(this).apply { setImageResource(R.drawable.ic_flusiva); contentDescription = "Flusiva" }, LinearLayout.LayoutParams(dp(40), dp(40)))
@@ -84,6 +84,7 @@ class MainActivity : ComponentActivity() {
         content = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(24), dp(8), dp(24), dp(32)); layoutParams = ViewGroup.LayoutParams(-1, -2) }
         scroll.addView(content); root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f)); setContentView(root)
         if (settings) settingsPage() else downloadPage()
+        root.requestFocus()
         root.requestApplyInsets()
     }
     private fun downloadPage() {

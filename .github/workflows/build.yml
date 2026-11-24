@@ -135,6 +135,7 @@ jobs:
           disable-animations: true
           script: bash scripts/android-device-check.sh
       - name: Build signed Android release
+        id: android-package
         env:
           KEYSTORE_BASE64: ${{ secrets.FLUSIVA_ANDROID_KEYSTORE_BASE64 }}
           FLUSIVA_ANDROID_STORE_PASSWORD: ${{ secrets.FLUSIVA_ANDROID_STORE_PASSWORD }}
@@ -152,6 +153,7 @@ jobs:
           version=$(node -p "require('./package.json').version")
           cp android/app/build/outputs/apk/release/app-release.apk "android-installers/Flusiva-$version-android.apk"
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "android-installers/Flusiva-$version-android.apk"
+          echo 'signed=true' >> "$GITHUB_OUTPUT"
       - name: Collect Android screenshots
         if: always()
         run: |
@@ -166,6 +168,7 @@ jobs:
             android/app/build/outputs/androidTest-results/
             android-test-results/
       - uses: actions/upload-artifact@v4
+        if: steps.android-package.outputs.signed == 'true'
         with:
           name: Flusiva-android
           path: android-installers/*.apk
