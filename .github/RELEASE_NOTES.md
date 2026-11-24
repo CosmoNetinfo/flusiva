@@ -1,8 +1,18 @@
-**Flusiva 0.5.0** arriva su Android. Download e conversioni avvengono sul telefono o sul computer, senza account o server Flusiva. Codice GPL-3.0-only.
+**Flusiva 0.6.0** aggiunge su Android un lettore musicale con playlist persistenti, ascolto in background, informazioni di qualità ed equalizzatore. Download e conversioni avvengono sul dispositivo, senza account o server Flusiva. Codice GPL-3.0-only.
+
+### Musica e playlist su Android
+
+* Apri **Musica e playlist** o scegli **Ascolta in Flusiva** dopo un download.
+* Crea, rinomina e modifica playlist dei file scaricati o importati. Riordina i brani tenendoli premuti; rimuovere un riferimento non elimina il file.
+* Continua l’ascolto con lo schermo spento, usando i controlli della notifica o delle cuffie. Posizione, precedente/successivo, casuale, ripetizione e timer.
+* Visualizza codec, bitrate audio, frequenza, canali e decoder. I dati assenti non vengono inventati; non sono una misura della qualità della sorgente o dell’uscita Bluetooth.
+* Equalizzatore legato alla sessione Flusiva: bande reali del dispositivo, preset e regolazione manuale. Se il dispositivo non lo supporta i controlli vengono disabilitati con una spiegazione.
+
+Le nuove funzioni musicali sono **per Android**. Gli installer Windows, Linux e Mac restano inclusi nella Release. [Guida musica e playlist](https://github.com/CosmoNetinfo/flusiva/blob/main/docs/MUSIC.md).
 
 ### Android
 
-Scarica **Flusiva-0.5.0-android.apk** per Android 10 o successivi. APK universale ARM64, ARMv7 e x86_64, firmato con la chiave gratuita del progetto.
+Scarica **Flusiva-0.6.0-android.apk** per Android 10 o successivi. APK universale ARM64, ARMv7 e x86_64, firmato con la stessa chiave della versione precedente: aggiorna senza disinstallare per conservare le preferenze.
 
 * Incolla il link o usa **Condividi → Flusiva** da YouTube e dalle altre piattaforme supportate.
 * Analizza il contenuto e scarica video MP4 o audio MP3, con qualità massima o personalizzata.

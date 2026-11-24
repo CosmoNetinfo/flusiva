@@ -12,4 +12,6 @@ L'utente può sostituire i programmi esterni nella cartella `resources/tools` co
 
 ## Android
 
+Il lettore usa AndroidX Media3 1.11.1 (Apache-2.0), https://github.com/androidx/media/tree/1.11.1, e Guava con le rispettive licenze Apache-2.0. L’equalizzatore usa le API della piattaforma Android.
+
 La build Android usa youtubedl-android 0.18.1 (GPL-3.0), inclusi runtime Python, QuickJS e FFmpeg: sorgenti, script di compilazione e avvisi upstream in https://github.com/yausername/youtubedl-android/tree/0.18.1, BUILD_PYTHON.md e BUILD_FFMPEG.md. Sono inclusi il motore zipapp ufficiale yt-dlp 2026.11.23 (Unlicense, componenti con licenze proprie), https://github.com/yt-dlp/yt-dlp/tree/2026.11.23, e il runtime libc++ del NDK 27.0.12077973 (Apache-2.0 con eccezioni LLVM), https://github.com/llvm/llvm-project/blob/main/libcxx/LICENSE.TXT. L’APK contiene LICENSE.txt, NOTICE.txt e NDK-NOTICE.txt negli asset. Le dipendenze AndroidX conservano la licenza Apache-2.0; Kotlin conserva Apache-2.0.

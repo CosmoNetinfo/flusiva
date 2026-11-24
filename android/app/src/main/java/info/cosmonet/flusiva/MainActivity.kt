@@ -31,6 +31,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var download: Button
     private lateinit var cancel: Button
     private lateinit var open: Button
+    private lateinit var listen: Button
     private lateinit var share: Button
     private lateinit var title: TextView
     private lateinit var status: TextView
@@ -91,6 +92,7 @@ class MainActivity : ComponentActivity() {
         content.addView(text("DAL LINK AL TUO TELEFONO", 11f, true).apply { setTextColor(blue); letterSpacing = .12f })
         content.addView(text("Il tuo link.\nIl tuo file.", 38f, true))
         content.addView(text("Video MP4 e audio MP3, nella qualità migliore disponibile.", 16f))
+        content.addView(button("Musica e playlist") { startActivity(Intent(this, MusicActivity::class.java)) })
         val input = card()
         input.addView(text("Link del contenuto", 15f, true))
         link = EditText(this).apply { hint = "https://…"; textSize = 16f; setTextColor(ink); inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_URI; maxLines = 3; setPadding(dp(12), dp(14), dp(12), dp(14)); background = bg(pale, 12, true); setText(draft); contentDescription = "Link del contenuto" }
@@ -113,6 +115,7 @@ class MainActivity : ComponentActivity() {
         status = text(""); status.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE; result.addView(status)
         cancel = button("Annulla operazione") { startService(Intent(this, DownloadService::class.java).setAction("cancel")) }; result.addView(cancel)
         open = button("Apri il file") { openSaved(false) }; result.addView(open)
+        listen = button("Ascolta in Flusiva") { DownloadState.value.saved?.let { startActivity(Intent(this, MusicActivity::class.java).putExtra("play_uri", it.toString())) } }; result.addView(listen)
         share = button("Condividi il file") { openSaved(true) }; result.addView(share)
         content.addView(text("YouTube · TikTok · Vimeo\nDailymotion · SoundCloud (solo MP3)", 12f).apply { gravity = Gravity.CENTER; setPadding(0, dp(24), 0, dp(8)) })
         content.addView(text("I file vengono salvati in Download/Flusiva. Usa contenuti tuoi o che puoi scaricare. Nessun account o server Flusiva.", 12f).apply { gravity = Gravity.CENTER })
@@ -126,6 +129,7 @@ class MainActivity : ComponentActivity() {
         progress.visibility = if (state.busy) View.VISIBLE else View.GONE; progress.isIndeterminate = state.percent == null; progress.progress = state.percent?.toInt() ?: 0
         cancel.visibility = if (state.busy) View.VISIBLE else View.GONE
         open.visibility = if (state.saved != null) View.VISIBLE else View.GONE; share.visibility = open.visibility
+        listen.visibility = open.visibility
         formats.findViewById<RadioButton>(R.id.format_mp4).isEnabled = !state.busy && state.info?.hasVideo != false
         formats.findViewById<RadioButton>(R.id.format_mp3).isEnabled = !state.busy && state.info?.hasAudio != false
         if (state.info?.hasVideo == false && state.info.hasAudio) formats.check(R.id.format_mp3)

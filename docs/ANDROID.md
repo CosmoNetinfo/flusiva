@@ -22,7 +22,11 @@ I file sono pubblicati tramite MediaStore, senza accesso generale alla memoria o
 
 In **Impostazioni → Aggiornamenti** si controlla la nuova versione e si apre la Release per il download manuale dell’APK. Android chiede la conferma prima dell’installazione. Per aggiornare un’app già installata il nuovo APK deve avere lo stesso identificativo e la stessa firma.
 
-## Compilazione
+## Musica e playlist dalla 0.6
+
+Aprire **Musica e playlist** per ascoltare i file scaricati o importati, creare playlist persistenti e continuare l’ascolto in background. Include dati di qualità del file, decoder, equalizzatore del dispositivo e timer. [Guida del lettore musicale](MUSIC.md).
+
+## Compilazione del progetto
 
 JDK 17, Android SDK 36, Build Tools 36.0.0 e NDK 27.0.12077973. Il wrapper Gradle 8.14.3 include il checksum della distribuzione; AGP 8.13.2 e Kotlin 2.2.21 sono fissati nel sorgente.
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 — 2026-11-25
+
+* Android: lettore musicale locale con Media3, controlli multimediali e riproduzione a schermo spento.
+* Playlist persistenti: creazione, rinomina, aggiunta/rimozione, riordino e cancellazione dei riferimenti senza cancellare l’audio. Coda, casuale e ripetizione.
+* Libreria dei file audio scaricati e importazione tramite selettore Android, senza permessi generali alla memoria.
+* Codec, bitrate audio, frequenza, canali e decoder; i dati mancanti non vengono inventati e il bitrate video non viene presentato come qualità audio.
+* Equalizzatore per la sessione Flusiva, bande e limiti letti dal dispositivo, preset, guadagni manuali e preferenze persistenti. Stato esplicito se non disponibile.
+* Timer di spegnimento e controlli di posizione, precedente/successivo. Test di playback e persistenza su emulatore aggiunti alla CI.
+* Le nuove funzioni musicali sono per Android; gli installer desktop restano inclusi nella Release unificata.
+
 ## 0.5.0 — 2026-11-24
 
 * App Android nativa Kotlin per Android 10+, APK universale ARM64/ARMv7/x86_64.

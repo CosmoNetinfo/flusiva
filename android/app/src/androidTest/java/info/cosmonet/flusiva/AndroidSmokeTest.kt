@@ -53,7 +53,7 @@ class AndroidSmokeTest {
             assertTrue("Il percorso completo yt-dlp/FFprobe/FFmpeg deve produrre MP3", extracted.length() > 30000)
         } finally { movie.delete(); extracted.delete(); File(context.cacheDir, "flusiva-extracted.mp4").delete() }
         val saved = Downloads.save(context, sample, "Flusiva test", "mp3") { false }
-        try { assertTrue(context.contentResolver.openInputStream(saved)!!.use { it.readBytes().size } > 10000) } finally { context.contentResolver.delete(saved, null, null); sample.delete() }
+        try { assertTrue(context.contentResolver.openInputStream(saved)!!.use { it.readBytes().size } > 10000); val facts = AudioInspection.read(context, saved); assertEquals(44100, facts.sampleRate); assertTrue(facts.bitrate!! >= 300000); assertEquals("audio/mpeg", facts.mime) } finally { context.contentResolver.delete(saved, null, null); sample.delete() }
         val cancelled = File(context.cacheDir, "cancel-test.mp3").apply { writeBytes(ByteArray(32)) }
         try { assertTrue(runCatching { Downloads.save(context, cancelled, "Flusiva cancelled", "mp3") { true } }.isFailure) } finally { cancelled.delete() }
     }
