@@ -5,7 +5,7 @@ Prima versione di **Flusiva**, app desktop in italiano per scaricare video MP4 e
 | Sistema | Pacchetto |
 | --- | --- |
 | Windows 10/11, PC Intel/AMD a 64 bit | `win-x64.exe` |
-| Linux Intel/AMD a 64 bit | `linux-x64.AppImage` oppure `linux-x64.deb` |
+| Linux Intel/AMD a 64 bit | `linux-x86_64.AppImage` oppure `linux-amd64.deb` |
 | macOS con processore Intel | `mac-x64.dmg` oppure `.zip` |
 | macOS con chip Apple Silicon | `mac-arm64.dmg` oppure `.zip` |
 
