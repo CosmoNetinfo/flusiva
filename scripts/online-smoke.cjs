@@ -11,7 +11,7 @@ async function main() {
   const downloader = createDownloader({toolsDir:tools,tempRoot:tmpdir(),nodePath:electron});
   const info = await downloader.inspect(process.argv[2] || 'https://www.youtube.com/watch?v=aqz-KE-bpKQ');
   console.log(`Video test: ${info.title}, ${info.duration}s`);
-  for (const [format,quality] of [['mp4','360'],['mp3','320']]) {
+  for (const [format,quality] of (info.hasVideo?[['mp4','360'],['mp3','320']]:[['mp3','320']])) {
     const result = await downloader.download(info,format,quality);
     try {
       const output = JSON.parse(execFileSync(join(tools,`ffprobe${exe}`),['-v','quiet','-show_streams','-show_format','-of','json',result.path],{encoding:'utf8',windowsHide:true}));
