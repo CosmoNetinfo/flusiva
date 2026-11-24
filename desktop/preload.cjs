@@ -21,7 +21,11 @@ contextBridge.exposeInMainWorld('flusiva', {
   clearQueue:()=>ipcRenderer.invoke('queue:clear'),
   revealQueueItem:id=>ipcRenderer.invoke('queue:reveal',id),
   checkUpdates:()=>ipcRenderer.invoke('updates:check'),
+  getUpdateState:()=>ipcRenderer.invoke('updates:get'),
+  downloadUpdate:()=>ipcRenderer.invoke('updates:download'),
+  installUpdate:()=>ipcRenderer.invoke('updates:install'),
   openUpdate:()=>ipcRenderer.invoke('updates:open'),
+  onUpdateChanged:callback=>{const listener=(_event,state)=>callback(state);ipcRenderer.on('updates:changed',listener);return ()=>ipcRenderer.removeListener('updates:changed',listener);},
   onQueueChanged:callback=>{
     const listener=(_event,state)=>callback(state);ipcRenderer.on('queue:changed',listener);
     return ()=>ipcRenderer.removeListener('queue:changed',listener);

@@ -1,12 +1,12 @@
 # Prossime versioni di Flusiva
 
-Valutazione del 24 novembre 2026, aggiornata per 0.3.0. YouTube, TikTok, Vimeo, Dailymotion e SoundCloud sono implementati. La 0.3 aggiunge coda seriale, dati del trasferimento, qualità massima e controllo delle nuove versioni. [Esiti reali e limiti delle prove](PLATFORMS.md). Spotify è stato rimandato su richiesta del proprietario.
+Valutazione del 24 novembre 2026, aggiornata per 0.4.0. YouTube, TikTok, Vimeo, Dailymotion e SoundCloud sono implementati. La 0.3 aggiunge coda seriale, dati del trasferimento, qualità massima e controllo delle nuove versioni. [Esiti reali e limiti delle prove](PLATFORMS.md). Spotify è stato rimandato su richiesta del proprietario.
 
 ## Prima di aggiungere piattaforme
 
 | Priorità | Funzione | Perché | Criterio di completamento |
 | --- | --- | --- | --- |
-| 1 | Aggiornamento dell’app con verifica delle firme | Gli estrattori cambiano con le piattaforme | Aggiornamento verificabile, rollback e comportamento chiaro senza rete |
+| Completata in 0.4, firma da configurare | Aggiornamento dell’app | Gli estrattori cambiano con le piattaforme | Windows/AppImage automatici, Debian esplicito; SHA-512 e feed ufficiale. macOS automatico solo con Developer ID. Rollback non implementato |
 | 1 | Firma Windows e firma/notarizzazione macOS | Riduce gli ostacoli all’installazione | Certificati del proprietario configurati come secret, verifica su macchine pulite |
 | 1 | Test dei download su tre sistemi | I test automatici con fixture non verificano YouTube | MP4 con audio, MP3, annullamento e disco pieno verificati su ogni OS |
 | Completata in 0.2 | Cartella preferita, formato e qualità ricordati | Riduce i clic sui download successivi | File JSON locale atomico, pagina Impostazioni, temi chiaro/scuro e ripristino |
@@ -39,4 +39,4 @@ Per TikTok i link abbreviati richiederanno risoluzione controllata prima del dow
 
 ## Sequenza consigliata
 
-**0.3:** coda, avanzamento, qualità massima e controllo delle versioni completati. **Prossimo ciclo:** prove sulle reti degli utenti, affidabilità degli estrattori, firma, aggiornamenti verificati e gestione dello spazio. **Poi:** ripresa di file parziali, coda persistente facoltativa e valutazione Instagram. Nessuna data promessa prima delle prove tecniche. Spotify rimane fuori dal piano attuale.
+**0.3:** coda, avanzamento, qualità massima e controllo delle versioni completati. **Prossimo ciclo:** prove sulle reti degli utenti, affidabilità degli estrattori, certificati di firma e gestione dello spazio. **Poi:** ripresa di file parziali, coda persistente facoltativa e valutazione Instagram. Nessuna data promessa prima delle prove tecniche. Spotify rimane fuori dal piano attuale.

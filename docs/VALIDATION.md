@@ -1,5 +1,14 @@
 # Verifiche della prima versione
 
+## Estensione 0.4.0
+
+* 41 test deterministici superati: 8 nuovi controlli per capacità dei sistemi, download automatico/manuale, verifica fallita, deduplicazione richieste, blocco con coda attiva, Debian e fallback Mac non firmato.
+* Preparazione feed verificata con checksum dei file effettivi, entrambe le architetture Mac e selezione architettura della classe reale MacUpdater.
+* Test Electron esteso ai nuovi controlli, lettura stato via IPC e rifiuto installazione quando non pronta. Il profilo di test disabilita gli aggiornamenti nativi.
+* La CI verifica che ogni pacchetto includa electron-updater e il feed del repository ufficiale.
+* L’installazione completa di un aggiornamento su macchine Windows, Linux e macOS degli utenti resta da verificare. Nessuna build macOS firmata disponibile in questa sessione; il fallback manuale è intenzionale.
+
+
 ## Estensione 0.3.0
 
 * 33 test deterministici: includono serializzazione della coda, continuazione dopo errore, annullamento, pausa, tentativi, deduplicazione, limiti e validazione atomica dei batch, MP3 SoundCloud, dati di avanzamento mancanti/stimati, politica qualità massima e controllo sicuro delle Release stabili.

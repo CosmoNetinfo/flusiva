@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0 — 2026-11-24
+
+* Aggiornamenti automatici con electron-updater: controllo all’avvio e ogni 6 ore, download verificato SHA-512 e avanzamento.
+* Windows e AppImage: installazione al riavvio richiesto o alla chiusura normale quando non ci sono lavori pendenti. Debian: installazione esplicita con autorizzazione del sistema.
+* macOS: percorso automatico per build firmate Developer ID; build attuali non firmate con controllo versione e installazione manuale.
+* Preferenza per disattivare l’automatismo, pulsanti di download/riavvio e blocco installazione durante download/coda.
+* Feed ufficiali per i tre sistemi, manifest Mac con entrambe le architetture, pubblicazione atomica tramite bozza Release e checksum SHA-256.
+* Configurazione GitHub Secrets predisposta per firma/notarizzazione Apple. Migrazione da 0.3: installare 0.4 manualmente una volta.
+* 41 test deterministici, inclusi errori e feed incompleti; controllo updater incluso nei pacchetti della CI.
+
+
 ## 0.3.0 — 2026-11-24
 
 * Coda seriale: inserimento multiplo, deduplicazione, pausa dopo il file attuale, annullamento, tentativi individuali, apertura dei file e pulizia degli elementi terminati.

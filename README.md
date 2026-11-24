@@ -4,7 +4,7 @@
 
 App desktop per scaricare **video MP4 e audio MP3 da YouTube, TikTok, Vimeo, Dailymotion e SoundCloud**, con interfaccia in italiano. Windows, Linux e macOS (Intel e Apple Silicon). Il computer dell'utente esegue download e conversione: nessun server remoto, account, hosting o database.
 
-Flusiva è gratuito e open source, distribuito con licenza [GNU GPL v3](LICENSE). La versione 0.3 aggiunge coda di download, velocità e tempo rimanente, controllo delle nuove versioni e modalità qualità massima.
+Flusiva è gratuito e open source, distribuito con licenza [GNU GPL v3](LICENSE). La versione 0.4 aggiunge download e installazione degli aggiornamenti dell’app, con avanzamento e protezione dei download in corso.
 
 ![Interfaccia desktop di Flusiva](docs/images/flusiva-desktop.png)
 
@@ -19,7 +19,7 @@ Gli installer sono nella sezione [Releases](https://github.com/CosmoNetinfo/flus
 | macOS Intel | `.dmg` / `.zip` con `x64` nel nome |
 | macOS Apple Silicon | `.dmg` / `.zip` con `arm64` nel nome |
 
-Le prime build non sono firmate né notarizzate. Windows e macOS possono mostrare avvisi sull'editore. Una distribuzione con firma richiede certificati del proprietario. Non è configurato un aggiornamento automatico: installare le nuove release per aggiornare anche yt-dlp.
+Le prime build non sono firmate né notarizzate. Windows e macOS possono mostrare avvisi sull'editore. Una distribuzione con firma richiede certificati del proprietario. **Da 0.3 o precedenti occorre installare manualmente la 0.4 una volta:** il sistema di aggiornamento è incluso dalla 0.4. Gli aggiornamenti includono anche gli strumenti distribuiti con l’app.
 
 Su Windows eseguire l’installer e scegliere la cartella. Su macOS aprire il DMG e trascinare Flusiva in Applicazioni; selezionare la variante adatta in **Informazioni su questo Mac**. Le build sono separate: `arm64` per chip Apple, `x64` per Intel. Verificare l’origine dalla repository ufficiale e il checksum della release prima di autorizzare un’app non firmata. Requisiti macOS ed Electron: [supporto delle piattaforme](https://www.electronjs.org/docs/latest/tutorial/support#supported-platforms).
 
@@ -63,7 +63,7 @@ Aprire **Impostazioni** nella barra superiore. Le modifiche entrano in vigore co
 * **Aspetto:** tema chiaro, scuro o di sistema, con opzione per ridurre le animazioni. Viene rispettata anche la preferenza di movimento del sistema.
 * **Piattaforme e versione:** riepilogo dei formati, motore incluso e collegamento alle release ufficiali.
 * **Ripristina preferenze:** torna ai valori iniziali; non elimina i file scaricati.
-* **Controlla all’avvio:** facoltativo e inizialmente disattivato. Controlla le Release ufficiali GitHub senza inviare i link scaricati. Il controllo manuale è sempre disponibile.
+* **Aggiornamenti automatici:** attivi inizialmente. Controlla e scarica le Release ufficiali GitHub senza inviare i link scaricati. Disattivabile; controllo e download manuali restano disponibili.
 
 Le preferenze sono in `settings.json` nella cartella dati dell’app (`app.getPath('userData')`), con scrittura atomica. Nessun database o sincronizzazione online. Un file corrotto viene recuperato con valori iniziali. Le impostazioni scelte durante un download si applicano a quelli successivi.
 
@@ -89,13 +89,23 @@ Durante il trasferimento l’app mostra byte scaricati, dimensione prevista, vel
 
 La qualità massima seleziona la migliore sorgente esposta dal servizio, senza preferire un MP4 inferiore soltanto per il contenitore. FFmpeg unisce o rimuxa le tracce in MP4 senza promettere miglioramenti della sorgente. Il codec risultante può richiedere un lettore aggiornato. MP3 è una conversione con perdita: 320 kbps in uscita non rende una sorgente compressa lossless e non supera restrizioni di accesso della piattaforma.
 
-## Controllo delle nuove versioni
+## Aggiornamenti automatici
 
-In **Impostazioni → Aggiornamenti**, premere **Controlla aggiornamenti**. L’app confronta la propria versione con l’ultima Release stabile del repository ufficiale `CosmoNetinfo/flusiva`. Se disponibile, mostra **Apri la nuova Release** e un avviso nella barra superiore. Niente token GitHub, cookie dei servizi o telemetria; richieste simultanee sono condivise e l’esito è riusato brevemente per evitare controlli ripetuti.
+Con l’opzione attiva, l’app controlla la Release stabile ufficiale circa 10 secondi dopo l’avvio e ogni 6 ore mentre rimane aperta. Scarica in background una versione successiva e mostra l’avanzamento in **Impostazioni → Aggiornamenti**. **Riavvia e installa** è disponibile soltanto quando non ci sono download o elementi della coda da completare. Un errore di rete o checksum lascia utilizzabile la versione corrente e permette di riprovare.
 
-Il controllo all’avvio può essere attivato salvando le preferenze. L’installazione resta manuale: non vengono scaricati o eseguiti automaticamente installer, non viene aggiornato yt-dlp di nascosto e non è presente un sistema di aggiornamenti firmati. Il nuovo installer aggiorna anche gli strumenti inclusi.
+| Sistema | Comportamento dalla 0.4 |
+| --- | --- |
+| Windows installer | Download automatico; installazione al clic su **Riavvia e installa** oppure alla chiusura normale se l’opzione è attiva e non ci sono lavori pendenti |
+| Linux AppImage | Stesso comportamento; avviare il file AppImage originale da una cartella scrivibile |
+| Linux Debian/Ubuntu | Download automatico; installazione richiesta esplicitamente dal pulsante, con eventuale autorizzazione del sistema |
+| macOS | Installazione automatica disponibile per build con firma Developer ID valida. Le build attuali non firmate controllano la versione e aprono la Release per l’installazione manuale |
+| Avvio dal sorgente | Solo controllo della versione e collegamento alla Release; nessuna installazione automatica |
 
-![Controllo aggiornamenti](docs/images/updates.png)
+Disattivando l’opzione e salvando le preferenze si fermano i controlli periodici e l’installazione alla chiusura; un trasferimento già iniziato può terminare. Si possono usare **Controlla aggiornamenti**, **Scarica aggiornamento** e **Riavvia e installa** per procedere esplicitamente.
+
+Il feed è fissato al repository ufficiale CosmoNetinfo/flusiva, via HTTPS. electron-updater verifica il checksum SHA-512 del pacchetto prima di dichiararlo pronto. I checksum verificano l’integrità rispetto al feed; non sostituiscono una firma dell’editore. Non vengono installati prerelease o downgrade. Niente token GitHub, cookie dei servizi o telemetria. [Configurazione firma e pubblicazione](docs/UPDATES.md).
+
+![Aggiornamenti](docs/images/updates.png)
 
 ## Spotify
 
@@ -124,16 +134,16 @@ Test online facoltativo: `node scripts/online-smoke.cjs`. Scarica il cortometrag
 
 Sonde dei soli metadati: `node scripts/platform-smoke.cjs`. Controlla contenuti pubblici sulle cinque piattaforme senza scaricare i file multimediali e registra esiti e restrizioni in `test-results/platform-probes.json`. Un blocco remoto viene registrato come tale, non come successo.
 
-Compilare sul sistema di destinazione. GitHub Actions esegue automaticamente i controlli, il test d'avvio Electron e la compilazione su quattro runner nativi. I 33 test deterministici non contattano i servizi esterni. Il test Electron verifica anche navigazione, preferenze via IPC, rifiuto di valori non validi, ripristino e presenza delle cinque piattaforme, con profilo isolato. Prima di una release pubblica verificare un download MP4 e MP3 reale su ciascun sistema con un video autorizzato.
+Compilare sul sistema di destinazione. GitHub Actions esegue automaticamente i controlli, il test d'avvio Electron e la compilazione su quattro runner nativi. I 41 test deterministici non contattano i servizi esterni. Il test Electron verifica anche navigazione, preferenze via IPC, rifiuto di valori non validi, ripristino e presenza delle cinque piattaforme, con profilo isolato. Prima di una release pubblica verificare un download MP4 e MP3 reale su ciascun sistema con un video autorizzato.
 
 Per pubblicare gli installer creare e inviare un tag coerente con `package.json`:
 
 ```sh
-git tag v0.3.0
-git push origin v0.3.0
+git tag v0.4.0
+git push origin v0.4.0
 ```
 
-Il workflow pubblica una GitHub Release solo quando tutte e quattro le build riescono. Include `SHA256SUMS.txt`. Nessun workflow Pages è necessario.
+Il workflow pubblica una GitHub Release solo quando tutte e quattro le build riescono. Prepara i feed Windows/Linux/macOS con SHA-512 e unisce le architetture Mac. Carica tutti i file in una bozza e la pubblica solo al termine. Include `SHA256SUMS.txt`. Nessun workflow Pages è necessario.
 
 ## Architettura
 
@@ -143,12 +153,12 @@ Il workflow pubblica una GitHub Release solo quando tutte e quattro le build rie
 * `core/settings.cjs` e `core/files.cjs`: preferenze locali validate, aggiornamenti atomici e salvataggio senza sovrascrittura.
 * `core/queue.cjs`: coda seriale, pausa, annullamento, tentativi e deduplicazione.
 * `core/progress.cjs` e `core/quality.cjs`: dati del trasferimento e politica di qualità massima.
-* `core/updates.cjs`: confronto delle versioni e controllo delle Release stabili ufficiali.
+* `core/updates.cjs`, `core/auto-updates.cjs`, `desktop/updater.cjs`: controllo versioni, download verificato, installazione e scelta delle capacità del sistema.
 * `core/`: processi senza shell, avanzamento, annullamento e pulizia dei temporanei.
 * `scripts/prepare-tools.mjs`: dipendenze native e controllo di integrità.
 * `.github/workflows/build.yml`: test, installer e pubblicazione release.
 
-Copertine e contenuti sono richiesti direttamente alle piattaforme e ai loro CDN. Nessun link viene inviato a un servizio Flusiva. Il controllo aggiornamenti contatta soltanto l’API pubblica GitHub quando richiesto o se l’utente ha attivato il controllo all’avvio. Il browser si apre solo al clic sul collegamento alle Release.
+Copertine e contenuti sono richiesti direttamente alle piattaforme e ai loro CDN. Nessun link viene inviato a un servizio Flusiva. Gli aggiornamenti contattano GitHub e i suoi endpoint di download quando richiesti o se l’opzione automatica è attiva. Il browser si apre solo al clic sul collegamento alle Release.
 
 Licenze dei componenti in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
@@ -156,7 +166,7 @@ Licenze dei componenti in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 Identità in blu, azzurro e bianco, con una F costruita da puntini. [Studio del logo e tre proposte](docs/BRAND.md), [tavola ad alta risoluzione](docs/brand/logo-study.png), [roadmap e piattaforme candidate](docs/ROADMAP.md), [note di rilascio](CHANGELOG.md) e [verifiche della versione](docs/VALIDATION.md).
 
-La versione 0.2.0 implementa TikTok, Vimeo, Dailymotion e SoundCloud; la 0.3.0 aggiunge coda, dati di avanzamento, qualità massima e controllo delle versioni. Restano in roadmap Instagram, firma digitale, aggiornamenti installabili verificati e ripresa dei file parziali. Spotify è rimandato.
+La versione 0.2.0 implementa TikTok, Vimeo, Dailymotion e SoundCloud; la 0.3.0 aggiunge coda, dati di avanzamento, qualità massima e controllo delle versioni. La 0.4 aggiunge gli aggiornamenti installabili su Windows/Linux e il percorso per macOS firmato. Restano in roadmap Instagram, certificati di firma e ripresa dei file parziali. Spotify è rimandato.
 
 ## Risolvere un problema
 

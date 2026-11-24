@@ -65,6 +65,18 @@ jobs:
             node_modules/.bin/electron . --smoke-test
           fi
       - run: npm run dist -- ${{ matrix.target }}
+        if: runner.os != 'macOS'
+      - name: Build macOS (Developer ID when configured)
+        if: runner.os == 'macOS'
+        run: npm run dist -- ${{ matrix.target }}
+        env:
+          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      - name: Verify bundled updater and official feed
+        run: node scripts/verify-update-config.cjs
       - uses: actions/upload-artifact@v4
         with:
           name: Flusiva-${{ matrix.label }}
@@ -74,6 +86,8 @@ jobs:
             release/*.deb
             release/*.dmg
             release/*.zip
+            release/*.blockmap
+            release/latest*.yml
           if-no-files-found: error
           retention-days: 14
   release:
@@ -84,14 +98,26 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
       - uses: actions/download-artifact@v4
         with:
           pattern: Flusiva-*
-          path: installers
-          merge-multiple: true
-      - name: Checksums
-        run: cd installers && sha256sum * > SHA256SUMS.txt
+          path: build-artifacts
+      - name: Prepare update feeds, architectures and checksums
+        run: node scripts/prepare-release.cjs build-artifacts installers
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" installers/* --repo "$GITHUB_REPOSITORY" --title "Flusiva $GITHUB_REF_NAME" --notes-file .github/RELEASE_NOTES.md
+        run: |
+          existing=$(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft 2>/dev/null || true)
+          if [ "$existing" = "false" ]; then
+            echo "La Release è già pubblicata: non sovrascrivo gli installer."
+            exit 1
+          elif [ "$existing" = "true" ]; then
+            gh release upload "$GITHUB_REF_NAME" installers/* --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" installers/* --repo "$GITHUB_REPOSITORY" --title "Flusiva $GITHUB_REF_NAME" --notes-file .github/RELEASE_NOTES.md --draft
+          fi
+          gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false --latest

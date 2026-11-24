@@ -9,7 +9,7 @@ const {PLATFORMS,downloadOptions:validateDownload}=require('../core/platforms.cj
 const {createSettingsStore}=require('../core/settings.cjs');
 const {saveUnique}=require('../core/files.cjs');
 const {createQueue}=require('../core/queue.cjs');
-const {createUpdateChecker}=require('../core/updates.cjs');
+const {createDesktopUpdater}=require('./updater.cjs');
 const {resolveQuality}=require('../core/quality.cjs');
 
 let window, active, inspected, lastSaved;
@@ -26,8 +26,7 @@ else {
     const settings=createSettingsStore(join(app.getPath('userData'),'settings.json'),app.getPath('downloads'));
     const chosenDirectories=new Set();
     const send=(channel,value)=>{if(window&&!window.isDestroyed())window.webContents.send(channel,value);};
-    const checkUpdates=createUpdateChecker(app.getVersion());
-    let lastUpdate=null;
+    let autoUpdates;
     async function saveDownload(info,{format,quality},{signal,onProgress},preferences){
       validateDownload(format,quality,info);
       let result;
@@ -53,7 +52,7 @@ else {
       }finally{await result?.cleanup();}
     }
     const queue=createQueue({
-      onChange:state=>send('queue:changed',state),
+      onChange:state=>{send('queue:changed',state);autoUpdates?.refreshActivity();},
       async run(job,{signal,onProgress}){
         const preferences=await settings.get();
         const info=await downloader.inspect(job.url,signal);
@@ -63,6 +62,7 @@ else {
         return saveDownload(info,{format,quality},{signal,onProgress},preferences);
       }
     });
+    autoUpdates=createDesktopUpdater({app,getPreferences:()=>settings.get(),isBusy:()=>!!active||queue.hasUnfinished(),onChange:state=>send('updates:changed',state),disabled:smokeMode});
     session.defaultSession.setPermissionRequestHandler((_contents,_permission,callback) => callback(false));
     session.defaultSession.setPermissionCheckHandler(() => false);
     const trusted = event => {
@@ -70,13 +70,17 @@ else {
     };
     const handle = (name, action) => ipcMain.handle(name, async (event, ...args) => {
       trusted(event);
-      try { return { ok: true, value: await action(...args) }; }
+      try {
+        if(['video:inspect','video:download','queue:add','queue:start'].includes(name)&&autoUpdates.snapshot().status==='installing')throw new Error('Installazione in corso. Attendi il riavvio di Flusiva.');
+        return { ok: true, value: await action(...args) };
+      }
       catch (error) { return { ok: false, error: error.message }; }
     });
     handle('video:inspect', async url => {
       if (active||queue.isBusy()) throw new Error('Attendi il download in corso o metti in pausa la coda.');
       active = new AbortController(); inspected = undefined;
-      try { inspected = await downloader.inspect(url, active.signal); return inspected; } finally { active = undefined; }
+      autoUpdates.refreshActivity();
+      try { inspected = await downloader.inspect(url, active.signal); return inspected; } finally { active = undefined;autoUpdates.refreshActivity(); }
     });
     handle('video:download', async options => {
       if (active||queue.isBusy()) throw new Error('Attendi il download in corso o metti in pausa la coda.');
@@ -84,11 +88,12 @@ else {
       const { format, quality } = options || {};
       validateDownload(format,quality,inspected);
       const controller = new AbortController(); active = controller;
+      autoUpdates.refreshActivity();
       try {
         const preferences=await settings.get();
         const effectiveQuality=resolveQuality(format,quality,preferences);
         return await saveDownload(inspected,{format,quality:effectiveQuality},{signal:controller.signal,onProgress:progress=>send('video:progress',progress)},preferences);
-      } finally {active=undefined;}
+      } finally {active=undefined;autoUpdates.refreshActivity();}
     });
     handle('video:cancel', () => { active?.abort(); });
     handle('queue:get',()=>queue.snapshot());
@@ -100,15 +105,18 @@ else {
     handle('queue:retry',id=>queue.retry(id));
     handle('queue:clear',()=>queue.clearFinished());
     handle('queue:reveal',id=>{const item=queue.snapshot().items.find(job=>job.id===id);if(item?.status==='done'&&item.path)shell.showItemInFolder(item.path);});
-    handle('updates:check',async()=>{lastUpdate=await checkUpdates();return lastUpdate;});
-    handle('updates:open',()=>shell.openExternal(lastUpdate?.status==='available'?lastUpdate.url:'https://github.com/CosmoNetinfo/flusiva/releases'));
+    handle('updates:get',()=>autoUpdates.snapshot());
+    handle('updates:check',()=>autoUpdates.check());
+    handle('updates:download',()=>autoUpdates.download());
+    handle('updates:install',()=>autoUpdates.install());
+    handle('updates:open',()=>shell.openExternal('https://github.com/CosmoNetinfo/flusiva/releases/latest'));
     handle('clipboard:read', () => clipboard.readText().slice(0,102400));
     handle('file:reveal', () => { if (lastSaved) shell.showItemInFolder(lastSaved); });
     handle('settings:get',()=>settings.get());
-    handle('settings:update',patch=>{
+    handle('settings:update',async patch=>{
       if(!patch)throw new Error('Preferenze non valide.');
       if(Object.hasOwn(patch,'downloadDirectory')&&!chosenDirectories.has(patch.downloadDirectory))throw new Error('Usa il selettore per scegliere la cartella.');
-      return settings.update(patch);
+      const updated=await settings.update(patch);await autoUpdates.configure();return updated;
     });
     handle('settings:choose-folder',async()=>{
       const current=await settings.get();
@@ -117,7 +125,7 @@ else {
       chosenDirectories.add(choice.filePaths[0]);
       return choice.filePaths[0];
     });
-    handle('settings:reset',()=>settings.reset());
+    handle('settings:reset',async()=>{const reset=await settings.reset();await autoUpdates.configure();return reset;});
     handle('app:releases',()=>shell.openExternal('https://github.com/CosmoNetinfo/flusiva/releases'));
     handle('app:about', async () => {
       let tools={};try{tools=JSON.parse(await require('node:fs/promises').readFile(join(app.isPackaged?join(process.resourcesPath,'tools'):join(__dirname,'../vendor'),'versions.json'),'utf8'));}catch{}
@@ -171,9 +179,12 @@ else {
             const cleared=(await window.flusiva.getQueue()).value.items.length===0;
             document.getElementById('queue-composer').open=false;
             document.getElementById('queue-announcement').textContent='';
-            const controls=!!document.getElementById('check-updates')&&!!document.getElementById('metric-speed')&&document.getElementById('settings-updates').closest('form')?.id==='settings-form';
+            const controls=['check-updates','download-update','install-update','update-download-progress','metric-speed'].every(id=>!!document.getElementById(id))&&document.getElementById('settings-updates').closest('form')?.id==='settings-form';
+            const updateState=await window.flusiva.getUpdateState();
+            const refusedInstall=await window.flusiva.installUpdate();
+            const updater=updateState.ok&&updateState.value.mode==='manual'&&!refusedInstall.ok;
             window.scrollTo(0,0);
-            return {added,invalid:!invalid.ok,retried,cleared,controls};
+            return {added,invalid:!invalid.ok,retried,cleared,controls,updater};
           })()`);
           if(Object.values(queueCheck).some(value=>value!==true))throw new Error(`Smoke coda: ${JSON.stringify(queueCheck)}`);
           const { execFileSync } = require('node:child_process');
@@ -215,6 +226,12 @@ else {
       }
     }
     createWindow();
+    if(!smokeMode){
+      const poll=async()=>{try{if(await autoUpdates.configure())await autoUpdates.check();}catch{ /* The state event reports network and provider errors. */ }};
+      const initialCheck=setTimeout(poll,10_000);initialCheck.unref();
+      const periodicCheck=setInterval(poll,6*60*60*1000);periodicCheck.unref();
+      app.on('before-quit',()=>{clearTimeout(initialCheck);clearInterval(periodicCheck);});
+    }
     app.on('activate', () => { if (!BrowserWindow.getAllWindows().length) createWindow(); });
   });
   app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });

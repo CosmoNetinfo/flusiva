@@ -1,7 +1,7 @@
 (() => {
   const el=id=>document.getElementById(id);
   let saved=null,draftDirectory=null,initializing=true;
-  const fields={defaultFormat:'default-format',videoQuality:'default-video-quality',audioQuality:'default-audio-quality',theme:'app-theme',askWhereToSave:'ask-where',openFolderAfterDownload:'open-folder',reduceMotion:'reduce-motion',checkUpdatesOnStartup:'check-updates-startup',maximumQuality:'maximum-quality'};
+  const fields={defaultFormat:'default-format',videoQuality:'default-video-quality',audioQuality:'default-audio-quality',theme:'app-theme',askWhereToSave:'ask-where',openFolderAfterDownload:'open-folder',reduceMotion:'reduce-motion',autoUpdateEnabled:'check-updates-startup',maximumQuality:'maximum-quality'};
   document.querySelector('.settings-actions').before(el('settings-updates'));
   const systemTheme=matchMedia('(prefers-color-scheme: dark)');
   function appearance(preferences) {
