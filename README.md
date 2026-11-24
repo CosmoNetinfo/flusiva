@@ -12,6 +12,8 @@ Flusiva è gratuito e open source, distribuito con licenza [GNU GPL v3](LICENSE)
 
 **Android 10 e successivi:** è disponibile anche l’app nativa, con link condivisi, MP4/MP3, notifiche, Impostazioni e salvataggio in Download/Flusiva. Scaricare l’APK dalle Release. [Installazione, funzioni e compilazione Android](docs/ANDROID.md).
 
+<img src="docs/images/android-download.png" alt="Flusiva su Android" width="280">
+
 Gli installer sono nella sezione [Releases](https://github.com/CosmoNetinfo/flusiva/releases). Dopo ogni push su `main`, GitHub Actions genera anche gli artifact scaricabili dalla scheda [Actions](https://github.com/CosmoNetinfo/flusiva/actions).
 
 | Sistema | File |

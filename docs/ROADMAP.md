@@ -1,5 +1,7 @@
 # Prossime versioni di Flusiva
 
+**Android 0.5:** app nativa implementata, con link condivisi, download MP4/MP3, qualità massima, notifiche, salvataggio MediaStore e Impostazioni. Restano da estendere su Android coda, temi e ripresa dei file parziali; prove su dispositivi fisici da raccogliere. [Guida Android](ANDROID.md).
+
 Valutazione del 24 novembre 2026, aggiornata per 0.4.0. YouTube, TikTok, Vimeo, Dailymotion e SoundCloud sono implementati. La 0.3 aggiunge coda seriale, dati del trasferimento, qualità massima e controllo delle nuove versioni. [Esiti reali e limiti delle prove](PLATFORMS.md). Spotify è stato rimandato su richiesta del proprietario.
 
 ## Prima di aggiungere piattaforme

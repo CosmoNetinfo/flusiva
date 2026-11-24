@@ -2,6 +2,8 @@
 
 App nativa Kotlin per **Android 10 o successivi**, con elaborazione sul telefono. APK universale per ARM64, ARMv7 e x86_64; include Python, yt-dlp 2026.11.23, QuickJS e FFmpeg. Non richiede Termux, un computer acceso, account o server Flusiva.
 
+<p><img src="images/android-download.png" alt="Flusiva Android: link e formati" width="300"> <img src="images/android-settings.png" alt="Flusiva Android: Impostazioni" width="300"></p>
+
 ## Installazione e uso
 
 Scaricare `Flusiva-VERSIONE-android.apk` dalle [Release ufficiali](https://github.com/CosmoNetinfo/flusiva/releases). Aprire l’APK dal browser o dal gestore file e consentire l’installazione da quella sorgente quando Android lo richiede. L’app non è pubblicata sul Play Store.
