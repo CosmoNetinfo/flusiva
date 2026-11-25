@@ -129,7 +129,7 @@ class MainActivity : ComponentActivity() {
     private fun updateSource() {
         if (!::download.isInitialized || settings) return
         val item = runCatching { MediaPolicy.identify(link.text.toString()) }.getOrNull()
-        MobileUi.text(source, item?.let { "Fonte riconosciuta: ${it.platform}${if (it.platform == "SoundCloud") " · solo audio" else ""}" } ?: "Fonte: incolla un link di YouTube, TikTok, Vimeo, Dailymotion o SoundCloud")
+        MobileUi.text(source, item?.let { "Fonte riconosciuta: ${it.platform}${if (it.platform == "SoundCloud") " · solo audio" else ""}" } ?: if (link.text.isBlank()) "Fonte: verrà riconosciuta dal link" else "Fonte non riconosciuta: usa un link supportato")
         val state = DownloadState.value
         val ready = item != null && state.info?.let { item.url in listOf(it.url, it.sourceUrl) } == true
         if (item?.platform == "SoundCloud" && selectedFormat != "mp3") formats.check(R.id.format_mp3)
@@ -137,6 +137,7 @@ class MainActivity : ComponentActivity() {
         formats.findViewById<RadioButton>(R.id.format_mp3).isEnabled = !state.busy && (!ready || state.info?.hasAudio != false)
         download.isEnabled = !state.busy && ready && if (selectedFormat == "mp3") state.info?.hasAudio == true else state.info?.hasVideo == true
         MobileUi.text(download, if (state.busy) "Operazione in corso…" else "Scarica ${selectedFormat.uppercase()}${item?.let { " da ${it.platform}" } ?: " sul telefono"}")
+        if (!state.busy && !state.failed && !ready && ::status.isInitialized) MobileUi.text(status, if (item != null) "Premi Analizza il link per preparare il download." else "Incolla un link supportato per iniziare.")
     }
     private fun render(state: DownloadSnapshot) {
         analyze.isEnabled = !state.busy; link.isEnabled = !state.busy

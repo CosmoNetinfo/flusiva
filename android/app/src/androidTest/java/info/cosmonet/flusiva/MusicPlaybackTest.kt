@@ -14,6 +14,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
+import androidx.test.uiautomator.Configurator
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,6 +44,10 @@ class MusicPlaybackTest {
         context.contentResolver.openOutputStream(uri)!!.use { output -> file.inputStream().use { it.copyTo(output) } }; file.delete()
     }
     @Test fun playlistsPersistAndPlaybackContinuesInBackground() {
+        // The seek cursor updates continuously. Wait for specific UI/player states,
+        // not a globally idle accessibility stream, as for any animated media UI.
+        val oldIdleTimeout = Configurator.getInstance().waitForIdleTimeout
+        Configurator.getInstance().setWaitForIdleTimeout(0)
         val uri = fixture(); val store = PlaylistStore(context); val playlist = store.create("Ascolto test ${System.currentTimeMillis()}")
         var controller: MediaController? = null
         var uiPlaylistId: String? = null
@@ -81,7 +86,7 @@ class MusicPlaybackTest {
             device.findObject(By.text("Audio")).click()
             assertNotNull(device.wait(Until.findObject(By.text("Audio ed equalizzatore")), 5000))
             assertNull(device.findObject(By.desc("Pausa")))
-            device.waitForIdle(); capture(device, "android-equalizer.png")
+            instrumentation.waitForIdleSync(); capture(device, "android-equalizer.png")
             device.findObject(By.text("Lettore")).click()
             var before = 0L; onMain { before = player.currentPosition; player.release(); controller = null }
             device.pressHome(); device.sleep(); Thread.sleep(2500); device.wakeUp(); device.executeShellCommand("wm dismiss-keyguard")
@@ -109,13 +114,13 @@ class MusicPlaybackTest {
             assertNotNull(device.wait(Until.findObject(By.text("Brani della playlist")), 5000))
             device.findObject(By.text("Flusiva player test.wav")).click(); device.findObject(By.res("android:id/button1")).click()
             await("Il brano selezionato non è nella playlist") { PlaylistStore(context).all().firstOrNull { it.id == uiPlaylistId }?.uris?.contains(uri.toString()) == true }
-            device.waitForIdle(); capture(device, "android-playlists.png")
+            instrumentation.waitForIdleSync(); capture(device, "android-playlists.png")
             device.findObject(By.text("Avvia playlist")).click()
             await("La playlist avviata dalla UI non suona") { MusicState.value.playing }
             assertNotNull(device.wait(Until.findObject(By.desc("Pausa")), 1000))
             onMain { player.pause() }
             store.delete(playlist.id); assertTrue(PlaylistStore(context).all().none { it.id == playlist.id })
             assertNotNull(context.contentResolver.openInputStream(uri)?.use { it.read() })
-        } finally { onMain { controller?.release() }; store.delete(playlist.id); uiPlaylistId?.let(store::delete); context.contentResolver.delete(uri, null, null); onMain { context.stopService(Intent(context, MusicService::class.java)) } }
+        } finally { onMain { controller?.release() }; store.delete(playlist.id); uiPlaylistId?.let(store::delete); context.contentResolver.delete(uri, null, null); onMain { context.stopService(Intent(context, MusicService::class.java)) }; Configurator.getInstance().setWaitForIdleTimeout(oldIdleTimeout) }
     }
 }

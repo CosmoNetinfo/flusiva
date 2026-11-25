@@ -7,7 +7,8 @@ import android.graphics.drawable.Drawable
 class MusicIcon(private val name: String, private val color: Int) : Drawable() {
     private val pen = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = this@MusicIcon.color; strokeWidth = 1.8f; strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND }
     override fun draw(canvas: Canvas) {
-        val save = canvas.save(); canvas.translate(bounds.left.toFloat(), bounds.top.toFloat()); canvas.scale(bounds.width() / 24f, bounds.height() / 24f)
+        val save = canvas.save(); val side = minOf(bounds.width(), bounds.height()).toFloat()
+        canvas.translate(bounds.left + (bounds.width() - side) / 2, bounds.top + (bounds.height() - side) / 2); canvas.scale(side / 24f, side / 24f)
         fun line(x: Float, y: Float, x2: Float, y2: Float) { pen.style = Paint.Style.STROKE; canvas.drawLine(x, y, x2, y2, pen) }
         fun triangle(points: FloatArray) { pen.style = Paint.Style.FILL; canvas.drawPath(Path().apply { moveTo(points[0], points[1]); lineTo(points[2], points[3]); lineTo(points[4], points[5]); close() }, pen) }
         when (name) {

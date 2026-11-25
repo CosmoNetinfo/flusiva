@@ -6,6 +6,8 @@ App nativa Kotlin per **Android 10 o successivi**, con elaborazione sul telefono
 
 ## Installazione e uso
 
+Dalla 0.7 la pagina **Scarica** è separata da **Musica**. La fonte viene riconosciuta dal link e mostrata prima del download; il pulsante indica formato e piattaforma, per esempio **Scarica MP3 da YouTube**. La sezione Musica ha pagine distinte **Lettore**, **Playlist** e **Audio**.
+
 Scaricare `Flusiva-VERSIONE-android.apk` dalle [Release ufficiali](https://github.com/CosmoNetinfo/flusiva/releases). Aprire l’APK dal browser o dal gestore file e consentire l’installazione da quella sorgente quando Android lo richiede. L’app non è pubblicata sul Play Store.
 
 1. Incollare un singolo link, oppure scegliere **Condividi → Flusiva** nell’app della piattaforma.

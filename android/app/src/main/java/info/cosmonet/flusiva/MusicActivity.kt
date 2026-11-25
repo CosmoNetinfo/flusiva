@@ -80,7 +80,7 @@ class MusicActivity : ComponentActivity() {
         setContentView(root); showPage(page); render(MusicState.value); loadLibrary(); root.requestFocus(); root.requestApplyInsets()
     }
     private fun playerPage(): View {
-        val body = column()
+        val body = column().apply { gravity = Gravity.CENTER_VERTICAL }
         body.addView(ImageView(this).apply { setImageDrawable(MusicIcon("music", MobileUi.blue)); background = MobileUi.touch(this@MusicActivity); setPadding(dp(16), dp(16), dp(16), dp(16)); importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO }, LinearLayout.LayoutParams(dp(72), dp(72)).apply { gravity = Gravity.CENTER_HORIZONTAL; topMargin = dp(12); bottomMargin = dp(12) })
         title = text("Nessun brano selezionato", 25f, true).apply { gravity = Gravity.CENTER; maxLines = 2; ellipsize = TextUtils.TruncateAt.END }; body.addView(title)
         artist = text("Apri la libreria per iniziare.").apply { gravity = Gravity.CENTER; setTextColor(MobileUi.muted); maxLines = 2 }; body.addView(artist)
@@ -104,7 +104,7 @@ class MusicActivity : ComponentActivity() {
         row(body, shuffle, button("−10 s") { controller?.let { it.seekTo((it.currentPosition - 10000).coerceAtLeast(0)) }; position() }, timer, button("+10 s") { controller?.let { it.seekTo((it.currentPosition + 10000).coerceAtMost(it.duration.coerceAtLeast(0))) }; position() }, repeat)
         status = text("", 13f).apply { gravity = Gravity.CENTER; setTextColor(MobileUi.muted); accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE }; body.addView(status)
         body.addView(text("Ascolto anche a schermo spento. Usa i controlli della notifica o delle cuffie.", 12f).apply { gravity = Gravity.CENTER; setTextColor(MobileUi.muted) }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(12) })
-        return ScrollView(this).apply { addView(body) }
+        return ScrollView(this).apply { isFillViewport = true; addView(body) }
     }
     private fun libraryPage(): View {
         val body = column(16); body.addView(text("Libreria e playlist", 23f, true))
@@ -225,7 +225,7 @@ class MusicActivity : ComponentActivity() {
     }
     private fun <T> change(work: () -> T, done: (T) -> Unit = {}) {
         MobileUi.text(libraryMessage, "Salvataggio…")
-        worker.execute { val result = runCatching(work); runOnUiThread { if (!isDestroyed) { result.onSuccess { done(it); loadLibrary() }.onFailure { announce(it.message ?: "Salvataggio non riuscito."); renderSongs() } } } }
+        worker.execute { val result = runCatching { work() to store.all() }; runOnUiThread { if (!isDestroyed) { result.onSuccess { done(it.first); playlists = it.second; refreshSelector(); renderSongs() }.onFailure { announce(it.message ?: "Salvataggio non riuscito."); renderSongs() } } } }
     }
     private fun editName(playlist: MusicPlaylist?) {
         val input = EditText(this).apply { setSingleLine(); setText(playlist?.name.orEmpty()); hint = "Nome playlist" }
