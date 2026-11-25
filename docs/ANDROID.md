@@ -26,7 +26,7 @@ In **Impostazioni → Aggiornamenti** si controlla la nuova versione e si apre l
 
 ## Musica e playlist dalla 0.6
 
-Aprire **Musica e playlist** per ascoltare i file scaricati o importati, creare playlist persistenti e continuare l’ascolto in background. Include dati di qualità del file, decoder, equalizzatore del dispositivo e timer. [Guida del lettore musicale](MUSIC.md).
+Aprire **Musica** per ascoltare i file scaricati o importati, creare playlist persistenti e continuare l’ascolto in background. Le pagine **Lettore**, **Playlist** e **Audio** separano riproduzione, libreria e impostazioni audio. Include dati di qualità del file, decoder, equalizzatore del dispositivo e timer. [Guida del lettore musicale](MUSIC.md).
 
 ## Compilazione del progetto
 

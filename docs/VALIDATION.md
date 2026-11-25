@@ -1,9 +1,11 @@
 # Verifiche della prima versione
 
-## Interfaccia Android 0.7.0
+## Interfaccia Android 0.7.1
 
 * Compilazione locale e Android Lint senza errori; test JVM esistenti superati.
 * Nuovi controlli su emulatore per riconoscimento della fonte YouTube, comando Scarica MP4 da YouTube, separazione tra Audio e Lettore e cambio delle icone Riproduci/Pausa dopo il tocco.
+* Sul tag `v0.7.1` i 3 test strumentati su Android 15 sono riusciti, compresa la riproduzione a schermo spento. Verificati anche lettore vuoto, controllo Riproduci disabilitato e accesso alla libreria. Screenshot finali di Scarica, Lettore, Playlist, Audio e Impostazioni ispezionati e copiati in `docs/images`.
+* Build e verifiche dei pacchetti Windows, Linux, Mac Intel e Mac Apple Silicon riuscite nella stessa esecuzione [GitHub Actions](https://github.com/CosmoNetinfo/flusiva/actions/runs/45563876545).
 * Libreria virtualizzata con ListView e righe riutilizzate. I salvataggi delle playlist e le letture dei file avvengono fuori dal thread UI; cambiare una playlist non esegue una nuova scansione dei file.
 * L’aggiornamento del cursore è locale alla pagina Lettore visibile. Informazioni del file e bande EQ vengono aggiornate quando cambiano; gli snapshot identici non vengono notificati di nuovo.
 * Non è stato misurato un confronto di latenza su un telefono fisico. Il comportamento reale viene verificato su emulatore insieme a playlist e riproduzione a schermo spento.

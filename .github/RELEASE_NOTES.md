@@ -10,7 +10,7 @@
 
 ### Musica e playlist su Android
 
-* Apri **Musica e playlist** o scegli **Ascolta in Flusiva** dopo un download.
+* Apri **Musica** dalla pagina **Scarica**, oppure scegli **Ascolta in Flusiva** dopo un download.
 * Crea, rinomina e modifica playlist dei file scaricati o importati. Riordina i brani tenendoli premuti; rimuovere un riferimento non elimina il file.
 * Continua l’ascolto con lo schermo spento, usando i controlli della notifica o delle cuffie. Posizione, precedente/successivo, casuale, ripetizione e timer.
 * Visualizza codec, bitrate audio, frequenza, canali e decoder. I dati assenti non vengono inventati; non sono una misura della qualità della sorgente o dell’uscita Bluetooth.
