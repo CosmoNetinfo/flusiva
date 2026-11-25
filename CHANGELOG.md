@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0 — 2026-11-25
+
+* Android: pagina Scarica distinta dalla sezione Musica, con navigazione dedicata a Lettore, Playlist e Audio/equalizzatore. I contenuti non sono più impilati in un’unica schermata.
+* Comandi musicali a icone, pulsante centrale di riproduzione, timer e modalità compatte, superfici piatte con feedback al tocco e stati disabilitati leggibili.
+* Risposta dei controlli dagli eventi MediaController e avanzamento aggiornato localmente; qualità ed EQ vengono ridisegnati solo quando cambiano.
+* Libreria con righe riutilizzate e salvataggi delle playlist fuori dal thread dell’interfaccia.
+* Downloader con piattaforma riconosciuta dal link e comando esplicito per formato e fonte, come Scarica MP3 da YouTube.
+
 ## 0.6.0 — 2026-11-25
 
 * Android: lettore musicale locale con Media3, controlli multimediali e riproduzione a schermo spento.

@@ -12,6 +12,8 @@ import android.os.Build
 import android.os.Bundle
 import android.view.*
 import android.widget.*
+import android.text.Editable
+import android.text.TextWatcher
 import androidx.activity.ComponentActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -38,6 +40,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var progress: ProgressBar
     private lateinit var formats: RadioGroup
     private lateinit var updateStatus: TextView
+    private lateinit var source: TextView
     private var settings = false
     private var draft = ""
     private var selectedFormat = "mp4"
@@ -46,11 +49,7 @@ class MainActivity : ComponentActivity() {
     private fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()
     private fun bg(color: Int, radius: Int = 16, stroke: Boolean = false) = GradientDrawable().apply { setColor(color); cornerRadius = dp(radius).toFloat(); if (stroke) setStroke(dp(1), Color.rgb(216, 229, 255)) }
     private fun text(value: String, size: Float = 16f, bold: Boolean = false) = TextView(this).apply { text = value; textSize = size; setTextColor(ink); if (bold) typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL); setPadding(0, dp(6), 0, dp(6)) }
-    private fun button(value: String, primary: Boolean = false, action: () -> Unit): Button = Button(this).apply {
-        text = value; isAllCaps = false; textSize = 15f; minimumHeight = dp(50); setTextColor(if (primary) Color.WHITE else blue)
-        background = bg(if (primary) blue else Color.WHITE, 14, !primary); setPadding(dp(14), dp(8), dp(14), dp(8))
-        layoutParams = LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) }; setOnClickListener { action() }
-    }
+    private fun button(value: String, primary: Boolean = false, action: () -> Unit): Button = MobileUi.button(this, value, primary, action).apply { layoutParams = LinearLayout.LayoutParams(-1, dp(48)).apply { topMargin = dp(8) } }
     private fun card(): LinearLayout = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL; background = bg(Color.WHITE, 22, true); setPadding(dp(20), dp(18), dp(20), dp(20))
         layoutParams = LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(20) }; content.addView(this)
@@ -81,6 +80,12 @@ class MainActivity : ComponentActivity() {
         bar.addView(text("Flusiva", 24f, true), LinearLayout.LayoutParams(0, -2, 1f))
         bar.addView(button(if (settings) "← Download" else "Impostazioni") { showPage(!settings) }.apply { layoutParams = LinearLayout.LayoutParams(-2, dp(50)) })
         root.addView(bar)
+        if (!settings) {
+            val navigation = LinearLayout(this).apply { setPadding(dp(20), 0, dp(20), dp(8)) }
+            navigation.addView(button("Scarica") {}.apply { isSelected = true }, LinearLayout.LayoutParams(0, dp(48), 1f))
+            navigation.addView(button("Musica") { startActivity(Intent(this, MusicActivity::class.java)) }, LinearLayout.LayoutParams(0, dp(48), 1f))
+            root.addView(navigation)
+        }
         val scroll = ScrollView(this).apply { isFillViewport = true }
         content = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(24), dp(8), dp(24), dp(32)); layoutParams = ViewGroup.LayoutParams(-1, -2) }
         scroll.addView(content); root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f)); setContentView(root)
@@ -89,25 +94,24 @@ class MainActivity : ComponentActivity() {
         root.requestApplyInsets()
     }
     private fun downloadPage() {
-        content.addView(text("DAL LINK AL TUO TELEFONO", 11f, true).apply { setTextColor(blue); letterSpacing = .12f })
-        content.addView(text("Il tuo link.\nIl tuo file.", 38f, true))
-        content.addView(text("Video MP4 e audio MP3, nella qualità migliore disponibile.", 16f))
-        content.addView(button("Musica e playlist") { startActivity(Intent(this, MusicActivity::class.java)) })
+        content.addView(text("Scarica un contenuto", 28f, true))
+        content.addView(text("Incolla il link, controlla la fonte e scegli MP4 o MP3.", 15f))
         val input = card()
         input.addView(text("Link del contenuto", 15f, true))
         link = EditText(this).apply { hint = "https://…"; textSize = 16f; setTextColor(ink); inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_URI; maxLines = 3; setPadding(dp(12), dp(14), dp(12), dp(14)); background = bg(pale, 12, true); setText(draft); contentDescription = "Link del contenuto" }
         input.addView(link, LinearLayout.LayoutParams(-1, -2))
+        source = text("Fonte: incolla un link supportato", 13f).apply { setTextColor(blue); accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE }; input.addView(source)
         input.addView(button("Incolla link") {
             val clipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
             link.setText(MediaPolicy.sharedLink(clipboard.primaryClip?.getItemAt(0)?.coerceToText(this).toString().takeIf { it != "null" }.orEmpty()))
         })
         analyze = button("Analizza il link", true) { startTask("inspect") }; input.addView(analyze)
         val result = card()
-        title = text("Scegli cosa portare con te.", 22f, true); result.addView(title)
+        title = text("Formato e qualità", 20f, true); result.addView(title)
         formats = RadioGroup(this).apply { orientation = RadioGroup.HORIZONTAL }
         for ((index, name) in listOf("Video MP4", "Audio MP3").withIndex()) formats.addView(RadioButton(this).apply { id = if (index == 0) R.id.format_mp4 else R.id.format_mp3; text = name; textSize = 15f; minHeight = dp(48); setTextColor(ink) }, RadioGroup.LayoutParams(0, -2, 1f))
         formats.check(if (selectedFormat == "mp3") R.id.format_mp3 else R.id.format_mp4)
-        formats.setOnCheckedChangeListener { _, checked -> selectedFormat = if (checked == R.id.format_mp3) "mp3" else "mp4" }
+        formats.setOnCheckedChangeListener { _, checked -> selectedFormat = if (checked == R.id.format_mp3) "mp3" else "mp4"; updateSource() }
         result.addView(formats)
         result.addView(text(if (prefs.maximum) "Qualità massima · MP3 fino a 320 kbps" else "Qualità personalizzata nelle Impostazioni", 12f).apply { setTextColor(blue) })
         download = button("Scarica sul telefono", true) { startTask("download") }; result.addView(download)
@@ -119,13 +123,26 @@ class MainActivity : ComponentActivity() {
         share = button("Condividi il file") { openSaved(true) }; result.addView(share)
         content.addView(text("YouTube · TikTok · Vimeo\nDailymotion · SoundCloud (solo MP3)", 12f).apply { gravity = Gravity.CENTER; setPadding(0, dp(24), 0, dp(8)) })
         content.addView(text("I file vengono salvati in Download/Flusiva. Usa contenuti tuoi o che puoi scaricare. Nessun account o server Flusiva.", 12f).apply { gravity = Gravity.CENTER })
+        link.addTextChangedListener(object : TextWatcher { override fun beforeTextChanged(value: CharSequence?, start: Int, count: Int, after: Int) {}; override fun onTextChanged(value: CharSequence?, start: Int, before: Int, count: Int) { updateSource() }; override fun afterTextChanged(value: Editable?) {} })
         render(DownloadState.value)
+    }
+    private fun updateSource() {
+        if (!::download.isInitialized || settings) return
+        val item = runCatching { MediaPolicy.identify(link.text.toString()) }.getOrNull()
+        MobileUi.text(source, item?.let { "Fonte riconosciuta: ${it.platform}${if (it.platform == "SoundCloud") " · solo audio" else ""}" } ?: "Fonte: incolla un link di YouTube, TikTok, Vimeo, Dailymotion o SoundCloud")
+        val state = DownloadState.value
+        val ready = item != null && state.info?.let { item.url in listOf(it.url, it.sourceUrl) } == true
+        if (item?.platform == "SoundCloud" && selectedFormat != "mp3") formats.check(R.id.format_mp3)
+        formats.findViewById<RadioButton>(R.id.format_mp4).isEnabled = !state.busy && item?.platform != "SoundCloud" && (!ready || state.info?.hasVideo != false)
+        formats.findViewById<RadioButton>(R.id.format_mp3).isEnabled = !state.busy && (!ready || state.info?.hasAudio != false)
+        download.isEnabled = !state.busy && ready && if (selectedFormat == "mp3") state.info?.hasAudio == true else state.info?.hasVideo == true
+        MobileUi.text(download, if (state.busy) "Operazione in corso…" else "Scarica ${selectedFormat.uppercase()}${item?.let { " da ${it.platform}" } ?: " sul telefono"}")
     }
     private fun render(state: DownloadSnapshot) {
         analyze.isEnabled = !state.busy; link.isEnabled = !state.busy
-        download.isEnabled = !state.busy && state.info != null
+        MobileUi.text(analyze, if (state.busy) "Attendi…" else "Analizza il link")
         status.text = state.message; status.setTextColor(if (state.failed) Color.rgb(170, 35, 50) else ink)
-        title.text = state.info?.let { "${it.title}\n${it.author}" } ?: "Scegli cosa portare con te."
+        title.text = state.info?.let { "${it.title}\n${it.author}" } ?: "Formato e qualità"
         progress.visibility = if (state.busy) View.VISIBLE else View.GONE; progress.isIndeterminate = state.percent == null; progress.progress = state.percent?.toInt() ?: 0
         cancel.visibility = if (state.busy) View.VISIBLE else View.GONE
         open.visibility = if (state.saved != null) View.VISIBLE else View.GONE; share.visibility = open.visibility
@@ -133,6 +150,7 @@ class MainActivity : ComponentActivity() {
         formats.findViewById<RadioButton>(R.id.format_mp4).isEnabled = !state.busy && state.info?.hasVideo != false
         formats.findViewById<RadioButton>(R.id.format_mp3).isEnabled = !state.busy && state.info?.hasAudio != false
         if (state.info?.hasVideo == false && state.info.hasAudio) formats.check(R.id.format_mp3)
+        updateSource()
     }
     private fun startTask(action: String) {
         try {

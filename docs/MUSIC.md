@@ -1,5 +1,7 @@
 # Lettore musicale Android
 
+Dalla **0.7.0**, la navigazione **Musica** apre tre pagine distinte: **Lettore** per ascolto e controlli, **Playlist** per libreria e gestione dei brani, **Audio** per dati di qualità ed equalizzatore. **Scarica** torna alla pagina del downloader. I comandi hanno feedback al tocco, icone e stati selezionati; le impostazioni audio non occupano più la pagina del lettore.
+
 Da **Flusiva 0.6.0 per Android**, aprire **Musica e playlist** dalla schermata principale oppure **Ascolta in Flusiva** dopo un download. Il lettore usa AndroidX Media3 1.11.1 e riproduce i file sul telefono, senza caricarli su un servizio Flusiva. Questa funzione è per Android; la versione desktop mantiene le proprie funzioni di download.
 
 <p><img src="images/android-music.png" alt="Lettore musicale con dati del file di prova" width="280"> <img src="images/android-equalizer.png" alt="Equalizzatore attivo con bande reali del dispositivo" width="280"></p>
@@ -14,7 +16,7 @@ La riproduzione continua quando si passa a un’altra app o si spegne lo schermo
 
 ## Playlist persistenti
 
-1. Aprire **Vai a brani e playlist** e scegliere **Nuova playlist**.
+1. Aprire la pagina **Playlist** e scegliere **Nuova playlist**.
 2. Inserire un nome, poi usare **Aggiungi brani** per selezionare i file della libreria.
 3. Premere **Avvia playlist**, oppure toccare un brano per iniziare da quello.
 

@@ -23,7 +23,7 @@ data class MusicSnapshot(val title: String = "La tua musica, qui.", val playing:
 object MusicState {
     @Volatile var value = MusicSnapshot(); private set
     val observers = CopyOnWriteArraySet<(MusicSnapshot) -> Unit>()
-    fun set(value: MusicSnapshot) { this.value = value; observers.forEach { it(value) } }
+    fun set(value: MusicSnapshot) { if (this.value == value) return; this.value = value; observers.forEach { it(value) } }
 }
 @androidx.annotation.OptIn(UnstableApi::class)
 class MusicService : MediaSessionService() {

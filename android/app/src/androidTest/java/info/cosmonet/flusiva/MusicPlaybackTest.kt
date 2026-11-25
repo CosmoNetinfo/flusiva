@@ -14,8 +14,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
-import androidx.test.uiautomator.UiScrollable
-import androidx.test.uiautomator.UiSelector
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -75,9 +73,16 @@ class MusicPlaybackTest {
             assertEquals(SessionResult.RESULT_SUCCESS, timer!!.get(10, TimeUnit.SECONDS).resultCode); assertTrue(MusicState.value.sleepRemaining > 0)
             onMain { timer = player.sendCustomCommand(SessionCommand(MusicService.SLEEP, Bundle.EMPTY), Bundle().apply { putInt("minutes", 0) }) }; timer!!.get(10, TimeUnit.SECONDS)
             capture(device, "android-music.png")
-            UiScrollable(UiSelector().scrollable(true)).scrollTextIntoView("Equalizzatore")
+            assertNotNull(device.wait(Until.findObject(By.desc("Pausa")), 1000))
+            device.findObject(By.desc("Pausa")).click()
+            assertNotNull(device.wait(Until.findObject(By.desc("Riproduci")), 1000))
+            await("La pausa dal tasto non è applicata") { !MusicState.value.playing }
+            device.findObject(By.desc("Riproduci")).click(); await("La riproduzione dal tasto non riparte") { MusicState.value.playing }
+            device.findObject(By.text("Audio")).click()
+            assertNotNull(device.wait(Until.findObject(By.text("Audio ed equalizzatore")), 5000))
+            assertNull(device.findObject(By.desc("Pausa")))
             device.waitForIdle(); capture(device, "android-equalizer.png")
-            UiScrollable(UiSelector().scrollable(true)).scrollToBeginning(20)
+            device.findObject(By.text("Lettore")).click()
             var before = 0L; onMain { before = player.currentPosition; player.release(); controller = null }
             device.pressHome(); device.sleep(); Thread.sleep(2500); device.wakeUp(); device.executeShellCommand("wm dismiss-keyguard")
             onMain { future = MediaController.Builder(context, SessionToken(context, ComponentName(context, MusicService::class.java))).buildAsync() }
@@ -90,8 +95,8 @@ class MusicPlaybackTest {
             onMain { player.seekToNextMediaItem() }; var index = -1; onMain { index = player.currentMediaItemIndex }; assertEquals(1, index)
             onMain { player.stop() }
             context.startActivity(Intent(context, MusicActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            assertNotNull(device.wait(Until.findObject(By.text("Vai a brani e playlist")), 10000))
-            device.findObject(By.text("Vai a brani e playlist")).click()
+            assertNotNull(device.wait(Until.findObject(By.text("Playlist")), 10000))
+            device.findObject(By.text("Playlist")).click()
             assertNotNull(device.wait(Until.findObject(By.text("Nuova playlist")), 5000))
             device.findObject(By.text("Nuova playlist")).click()
             val editor = device.wait(Until.findObject(By.clazz("android.widget.EditText")), 5000)!!
@@ -107,6 +112,7 @@ class MusicPlaybackTest {
             device.waitForIdle(); capture(device, "android-playlists.png")
             device.findObject(By.text("Avvia playlist")).click()
             await("La playlist avviata dalla UI non suona") { MusicState.value.playing }
+            assertNotNull(device.wait(Until.findObject(By.desc("Pausa")), 1000))
             onMain { player.pause() }
             store.delete(playlist.id); assertTrue(PlaylistStore(context).all().none { it.id == playlist.id })
             assertNotNull(context.contentResolver.openInputStream(uri)?.use { it.read() })

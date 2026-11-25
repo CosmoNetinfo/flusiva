@@ -65,6 +65,8 @@ class AndroidSmokeTest {
         capture(device, "android-startup.png")
         assertNotNull(device.wait(Until.findObject(By.text("Analizza il link")), 10000))
         assertNotNull(device.findObject(By.text("https://youtu.be/aqz-KE-bpKQ")))
+        assertNotNull(device.findObject(By.text("Fonte riconosciuta: YouTube")))
+        assertNotNull(device.findObject(By.text("Scarica MP4 da YouTube")))
         capture(device, "android-download.png")
         device.findObject(By.text("Impostazioni")).click()
         assertNotNull(device.wait(Until.findObject(By.text("Usa la qualità massima")), 5000))
