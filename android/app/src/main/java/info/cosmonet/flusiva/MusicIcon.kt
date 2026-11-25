@@ -1,11 +1,20 @@
 package info.cosmonet.flusiva
 
 import android.graphics.*
+import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 
 /** Small code-native icons. Touch targets are set by the containing views. */
 class MusicIcon(private val name: String, private val color: Int) : Drawable() {
     private val pen = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = this@MusicIcon.color; strokeWidth = 1.8f; strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND }
+    private var tint: ColorStateList? = null
+    override fun setTintList(tint: ColorStateList?) { this.tint = tint; onStateChange(state) }
+    override fun isStateful(): Boolean = tint?.isStateful == true || super.isStateful()
+    override fun onStateChange(state: IntArray): Boolean {
+        val next = tint?.getColorForState(state, color) ?: color
+        if (pen.color == next) return false
+        pen.color = next; invalidateSelf(); return true
+    }
     override fun draw(canvas: Canvas) {
         val save = canvas.save(); val side = minOf(bounds.width(), bounds.height()).toFloat()
         canvas.translate(bounds.left + (bounds.width() - side) / 2, bounds.top + (bounds.height() - side) / 2); canvas.scale(side / 24f, side / 24f)

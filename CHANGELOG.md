@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.1 — 2026-11-25
+
+* Stati visivi coerenti per icone disabilitate e comandi selezionati.
+* Prova delle preferenze con attesa esplicita dell’evento di input, oltre ai controlli di navigazione, fonte e playback della 0.7.
+
 ## 0.7.0 — 2026-11-25
 
 * Android: pagina Scarica distinta dalla sezione Musica, con navigazione dedicata a Lettore, Playlist e Audio/equalizzatore. I contenuti non sono più impilati in un’unica schermata.

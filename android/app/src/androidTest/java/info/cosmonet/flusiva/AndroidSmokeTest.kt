@@ -58,6 +58,7 @@ class AndroidSmokeTest {
         try { assertTrue(runCatching { Downloads.save(context, cancelled, "Flusiva cancelled", "mp3") { true } }.isFailure) } finally { cancelled.delete() }
     }
     @Test fun sharedLinkAndSettingsAreUsable() {
+        Preferences(context).reset()
         val device = UiDevice.getInstance(instrumentation)
         device.wakeUp(); device.executeShellCommand("wm dismiss-keyguard")
         context.startActivity(Intent(context, MainActivity::class.java).setAction(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, "Guarda https://youtu.be/aqz-KE-bpKQ").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
@@ -78,6 +79,8 @@ class AndroidSmokeTest {
         device.findObject(By.text("Impostazioni")).click()
         assertNotNull(device.wait(Until.findObject(By.text("Usa la qualità massima")), 5000))
         device.findObject(By.text("Usa la qualità massima")).click()
+        val deadline = android.os.SystemClock.elapsedRealtime() + 5000
+        while (Preferences(context).maximum && android.os.SystemClock.elapsedRealtime() < deadline) Thread.sleep(50)
         assertFalse(Preferences(context).maximum)
         capture(device, "android-settings.png")
         Preferences(context).reset()

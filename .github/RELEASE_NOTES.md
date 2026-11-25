@@ -1,4 +1,4 @@
-**Flusiva 0.7.0** ridisegna Android con pagine distinte per download, lettore, playlist e audio. Comandi musicali più compatti e risposta diretta agli eventi del lettore. Download e conversioni restano sul dispositivo. Codice GPL-3.0-only.
+**Flusiva 0.7.1** ridisegna Android con pagine distinte per download, lettore, playlist e audio. Comandi musicali più compatti e risposta diretta agli eventi del lettore. Download e conversioni restano sul dispositivo. Codice GPL-3.0-only.
 
 ### Nuova navigazione Android
 
@@ -20,7 +20,7 @@ Le nuove funzioni musicali sono **per Android**. Gli installer Windows, Linux e 
 
 ### Android
 
-Scarica **Flusiva-0.7.0-android.apk** per Android 10 o successivi. APK universale ARM64, ARMv7 e x86_64, firmato con la stessa chiave della versione precedente: aggiorna senza disinstallare per conservare preferenze e playlist.
+Scarica **Flusiva-0.7.1-android.apk** per Android 10 o successivi. APK universale ARM64, ARMv7 e x86_64, firmato con la stessa chiave della versione precedente: aggiorna senza disinstallare per conservare preferenze e playlist.
 
 * Incolla il link o usa **Condividi → Flusiva** da YouTube e dalle altre piattaforme supportate.
 * Analizza il contenuto e scarica video MP4 o audio MP3, con qualità massima o personalizzata.
