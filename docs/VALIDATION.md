@@ -7,6 +7,7 @@
 * Prima prova Actions su Android 15 riuscita: 3 test su emulatore, inclusi lettura dei dati MP3, persistenza e cancellazione delle playlist senza cancellazione dell’audio, WAV reale con 44.1 kHz/mono/16 bit, seek, pausa, passaggio al brano successivo, timer e gestione dell’equalizzatore.
 * La prova ha rilasciato il controller della schermata, spento lo schermo e riconnesso un controller verificando che la riproduzione fosse ancora attiva e avanzata. Profilo dell’emulatore isolato.
 * Le prove su cuffie Bluetooth, altri effetti audio e telefoni fisici rimangono da raccogliere. Non è stata misurata la qualità acustica dell’uscita.
+* Verifica finale sul tag v0.6.0 riuscita: tutti i job di build e i test su emulatore hanno avuto esito positivo. La prova UI ha creato una playlist, aggiunto il file selezionato e avviato la riproduzione. Screenshot reali di lettore, EQ attivo e scelta dei brani ispezionati e inclusi nella guida.
 
 ## Estensione Android 0.5.0
 

@@ -12,13 +12,13 @@ Scaricare `Flusiva-VERSIONE-android.apk` dalle [Release ufficiali](https://githu
 2. Premere **Analizza il link**, scegliere Video MP4 o Audio MP3 e **Scarica sul telefono**.
 3. Il file viene salvato in **Download/Flusiva**. Si può aprire o condividere dall’app.
 
-YouTube, TikTok, Vimeo e Dailymotion offrono MP4/MP3; SoundCloud solo MP3. Nessun supporto Spotify, playlist, dirette, contenuti con DRM, account o importazione cookie. Restrizioni e disponibilità dipendono dalle piattaforme; le verifiche desktop non dimostrano automaticamente il funzionamento su ogni telefono o rete.
+YouTube, TikTok, Vimeo e Dailymotion offrono MP4/MP3; SoundCloud solo MP3. Nessun supporto Spotify, download di playlist delle piattaforme, dirette, contenuti con DRM, account o importazione cookie. Le playlist locali di ascolto sono disponibili dalla 0.6. Restrizioni e disponibilità dipendono dalle piattaforme; le verifiche desktop non dimostrano automaticamente il funzionamento su ogni telefono o rete.
 
 La qualità massima è attiva inizialmente: cerca la migliore sorgente video/audio disponibile e converte MP3 a 320 kbps. Non può migliorare la qualità della sorgente. Disattivarla nelle Impostazioni per scegliere un limite di risoluzione o un bitrate diverso. MP4 può contenere codec che il lettore del telefono non supporta.
 
 Il download continua tramite servizio in primo piano, con notifica e comando **Annulla**. Consentire le notifiche per vedere l’avanzamento fuori dall’app. L’annullamento rimane disponibile nell’interfaccia anche senza tale permesso. Un file alla volta, massimo 6 ore di contenuto, 8 GiB per traccia e 2 ore per operazione; servono spazio e batteria per i file temporanei e la conversione. Android può imporre ulteriori limiti ai servizi in background. Una chiusura forzata interrompe il lavoro; i temporanei vengono ripuliti alla successiva operazione.
 
-I file sono pubblicati tramite MediaStore, senza accesso generale alla memoria o ai file altrui. Un salvataggio interrotto viene rimosso. Le preferenze sono locali, senza database. La prima versione Android non include coda, temi scuri o ripresa dei file parziali della versione desktop.
+I file sono pubblicati tramite MediaStore, senza accesso generale alla memoria o ai file altrui. Un salvataggio interrotto viene rimosso. Le preferenze sono locali, senza database. Android non include ancora coda dei download, temi scuri o ripresa dei file parziali; la coda di ascolto musicale è disponibile dalla 0.6.
 
 In **Impostazioni → Aggiornamenti** si controlla la nuova versione e si apre la Release per il download manuale dell’APK. Android chiede la conferma prima dell’installazione. Per aggiornare un’app già installata il nuovo APK deve avere lo stesso identificativo e la stessa firma.
 

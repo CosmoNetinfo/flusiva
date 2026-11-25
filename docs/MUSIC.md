@@ -2,6 +2,8 @@
 
 Da **Flusiva 0.6.0 per Android**, aprire **Musica e playlist** dalla schermata principale oppure **Ascolta in Flusiva** dopo un download. Il lettore usa AndroidX Media3 1.11.1 e riproduce i file sul telefono, senza caricarli su un servizio Flusiva. Questa funzione è per Android; la versione desktop mantiene le proprie funzioni di download.
 
+<p><img src="images/android-music.png" alt="Lettore musicale con dati del file di prova" width="280"> <img src="images/android-equalizer.png" alt="Equalizzatore attivo con bande reali del dispositivo" width="280"></p>
+
 ## Brani e ascolto
 
 La libreria elenca i file audio creati da Flusiva in Download/Flusiva. **Importa file audio** permette di scegliere altri file con il selettore Android, senza chiedere accesso generale alla memoria. Il selettore deve concedere un accesso permanente al file. MP3, AAC/M4A, FLAC, Ogg/Opus e WAV dipendono dai decoder disponibili sul dispositivo. Il lettore può anche ascoltare la traccia audio di un MP4 aperto da un download.
@@ -17,6 +19,8 @@ La riproduzione continua quando si passa a un’altra app o si spegne lo schermo
 3. Premere **Avvia playlist**, oppure toccare un brano per iniziare da quello.
 
 **Gestisci playlist** permette di modificare i brani, rinominare o eliminare la playlist. Tenendo premuto un brano si può spostarlo prima/dopo o rimuoverlo. Eliminare una playlist o rimuovere un riferimento non elimina i file audio. La modifica di una playlist salvata si applica quando la si avvia nuovamente; la coda già in ascolto rimane quella avviata.
+
+<img src="images/android-playlists.png" alt="Selezione dei file da aggiungere alla playlist" width="280">
 
 Fino a 50 playlist, con massimo 500 riferimenti per playlist. I riferimenti sono URI locali `content://`, salvati in JSON nelle preferenze dell’app, senza database e senza duplicare i file. Nome e ordine rimangono dopo la riapertura e gli aggiornamenti dell’app. Disinstallazione o cancellazione dei dati dell’app rimuovono le playlist; spostare o cancellare un file può rendere il relativo riferimento non più accessibile.
 
