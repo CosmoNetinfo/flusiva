@@ -1,5 +1,13 @@
 # Verifiche della prima versione
 
+## Lettore musicale Android 0.6.0
+
+* 7 test JVM riusciti: ai 4 test Android precedenti si aggiungono validazione e ordinamento playlist, preset EQ e limiti del dispositivo, rappresentazione della durata.
+* Android Lint senza errori e build APK riuscita. Media3 1.11.1 risolto e incluso nel pacchetto.
+* Prima prova Actions su Android 15 riuscita: 3 test su emulatore, inclusi lettura dei dati MP3, persistenza e cancellazione delle playlist senza cancellazione dell’audio, WAV reale con 44.1 kHz/mono/16 bit, seek, pausa, passaggio al brano successivo, timer e gestione dell’equalizzatore.
+* La prova ha rilasciato il controller della schermata, spento lo schermo e riconnesso un controller verificando che la riproduzione fosse ancora attiva e avanzata. Profilo dell’emulatore isolato.
+* Le prove su cuffie Bluetooth, altri effetti audio e telefoni fisici rimangono da raccogliere. Non è stata misurata la qualità acustica dell’uscita.
+
 ## Estensione Android 0.5.0
 
 * Compilazione locale dell’APK riuscita, Android Lint senza errori e 4 test JVM superati per URL, piattaforme, qualità e nomi file.
