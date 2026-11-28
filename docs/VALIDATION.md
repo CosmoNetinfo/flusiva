@@ -1,6 +1,6 @@
 # Verifiche della prima versione
 
-## Verifica MP4 e aggiornamenti Android — 0.9.0
+## Verifica MP4 e aggiornamenti Android — 0.9.1
 
 * Il Reel segnalato nello screenshot è stato scaricato completamente su Windows: MP4 da 1.367.597 byte, VP9 (`vp09`) 1916×1078 con audio HE-AAC, durata circa 15.071 secondi. FFprobe lo riconosce correttamente. Il controllo Android precedente dipendeva da MediaMetadataRetriever e poteva rifiutare un contenitore valido se il telefono non ne riconosceva il codec; ora usa FFprobe incluso e distingue file incompleto, durata non verificabile, limite superato e traccia assente.
 * Fixture VP9 sintetica inclusa soltanto nell’APK dei test: il Reel dell’utente non è distribuito. Le prove su emulatore verificano accettazione MP4 VP9, rifiuto come file audio, rifiuto di un MP4 corrotto e mantenimento dei controlli della durata.

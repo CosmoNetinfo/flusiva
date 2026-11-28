@@ -130,15 +130,17 @@ object Engine {
     }
     fun verifyOutput(context: Context, file: File, format: String) {
         // Probe the container independently of the phone's hardware codecs.
-        val libraries = File(context.noBackupFilesDir, "youtubedl-android/packages/ffmpeg/usr/lib").path
+        val libraries = File(context.noBackupFilesDir, "youtubedl-android/packages/python/usr/lib").path + ":" + File(context.noBackupFilesDir, "youtubedl-android/packages/ffmpeg/usr/lib").path
         val process = ProcessBuilder(File(context.applicationInfo.nativeLibraryDir, "libffprobe.so").path,
             "-v", "error", "-show_entries", "format=duration:stream=codec_type", "-of", "json", file.path)
-            .redirectError(File("/dev/null")).apply { environment()["LD_LIBRARY_PATH"] = libraries }.start()
+            .redirectErrorStream(true).apply { environment()["LD_LIBRARY_PATH"] = libraries }.start()
         verification = process
         try {
             check(process.waitFor(30, TimeUnit.SECONDS)) { "La verifica del file ha impiegato troppo tempo. Riprova." }
+            val output = process.inputStream.bufferedReader().use { it.readText() }
+            if (process.exitValue() != 0) android.util.Log.w("FlusivaProbe", "FFprobe exit ${process.exitValue()}: ${output.take(2000)}")
             check(process.exitValue() == 0) { "Il file scaricato è incompleto o non è leggibile. Riprova il download." }
-            val result = JSONObject(process.inputStream.bufferedReader().use { it.readText() })
+            val result = JSONObject(output)
             val duration = result.optJSONObject("format")?.optDouble("duration", Double.NaN) ?: Double.NaN
             check(duration.isFinite() && duration > 0) { "Non è possibile verificare la durata del file scaricato." }
             check(duration <= 21600) { "Il contenuto supera la durata massima di 6 ore." }

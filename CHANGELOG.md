@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.1 — 2026-11-28
+
+* FFprobe eredita anche il percorso delle librerie Python condivise dal motore, oltre a quelle FFmpeg. Diagnostica del processo registrata separatamente dagli errori mostrati nell’interfaccia.
+* La build 0.9.0 non è stata pubblicata: i test su emulatore hanno bloccato il problema prima della Release. I test dell’aggiornamento APK sono riusciti nella prima prova.
+
 ## 0.9.0 — 2026-11-28
 
 * Android: verifica dei file MP4/MP3 Meta con FFprobe incluso, indipendente dai decoder del telefono. Corretto il rifiuto di MP4 VP9 validi; durata, traccia richiesta e integrità rimangono controllate, con errori distinti.

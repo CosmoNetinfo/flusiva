@@ -35,3 +35,13 @@ Il controllo avviene dopo 10 secondi dall’avvio e ogni 6 ore quando abilitato.
 Windows/AppImage installano al riavvio esplicito o alla chiusura normale con automatismo attivo e nessun lavoro pendente. AppImage deve essere avviata dal file originale in una cartella scrivibile. Il pacchetto Debian richiede il pulsante esplicito e può chiedere autorizzazione del sistema; non installa alla chiusura. La coda, anche in pausa, impedisce l’installazione finché contiene elementi da completare.
 
 Non sono implementati rollback automatico, aggiornamento separato di yt-dlp e firma crittografica autonoma dei manifest. Le build Windows attuali non hanno firma dell’editore.
+
+## Android dalla 0.9
+
+L’app usa la Release stabile del medesimo repository GitHub. Il controllo all’avvio viene eseguito al massimo una volta al giorno, è disattivabile e non avvia il trasferimento dell’APK. **Scarica aggiornamento** crea un download Android DownloadManager con destinazione nella cartella esterna privata `Download/updates` dell’app; l’ID viene salvato per recuperarne lo stato dopo la chiusura o un riavvio.
+
+La notifica del trasferimento è gestita da Android. Al completamento l’eventuale notifica Flusiva apre le Impostazioni dell’app, senza avviare direttamente l’installer. La verifica legge l’hash SHA-256 dell’asset GitHub (oppure il file `SHA256SUMS.txt` della stessa Release), controlla dimensione, package, versionCode e certificato corrispondente all’app installata. Un errore elimina il file di aggiornamento e consente di riprovare; i file multimediali e le playlist rimangono separati.
+
+Solo dopo la verifica il pulsante **Installa aggiornamento** offre all’installer un URI FileProvider con accesso temporaneo in lettura. Il provider espone soltanto la cartella degli APK di aggiornamento. Android può chiedere l’abilitazione delle installazioni da Flusiva; l’utente torna poi nell’app e conferma l’installazione di sistema. Non viene eseguita un’installazione silenziosa. Un download di contenuti in corso impedisce l’avvio dell’installazione.
+
+La firma resta quella Android del progetto già usata nelle Release 0.5–0.8, senza certificati Apple o servizi esterni. Per passare da 0.8.1 o precedenti alla 0.9 serve una prima installazione manuale dell’APK sopra l’app esistente. Le prove automatiche verificano gli archivi reali e i rifiuti, ma non sostituiscono una prova completa di aggiornamento su un telefono fisico.

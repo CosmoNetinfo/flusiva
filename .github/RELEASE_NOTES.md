@@ -1,4 +1,4 @@
-**Flusiva 0.9.0** corregge la verifica dei video Android e aggiunge gli aggiornamenti direttamente dall’app.
+**Flusiva 0.9.1** corregge la verifica dei video Android e aggiunge gli aggiornamenti direttamente dall’app.
 
 ### Video Instagram e Facebook
 
@@ -18,7 +18,7 @@
 
 ### Installazione
 
-**Android 10+: Flusiva-0.9.0-android.apk**. Stessa firma delle versioni precedenti: installare sopra l’app esistente, senza disinstallare, per conservare playlist e preferenze.
+**Android 10+: Flusiva-0.9.1-android.apk**. Stessa firma delle versioni precedenti: installare sopra l’app esistente, senza disinstallare, per conservare playlist e preferenze.
 
 Inclusi anche gli installer Windows x64, Linux x64, Mac Intel e Apple Silicon. Su Mac non firmato resta il download manuale.
 
