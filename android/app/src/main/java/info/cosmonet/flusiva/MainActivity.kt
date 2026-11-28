@@ -31,6 +31,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var link: EditText
     private lateinit var analyze: Button
     private lateinit var download: Button
+    private lateinit var photos: Button
     private lateinit var cancel: Button
     private lateinit var open: Button
     private lateinit var listen: Button
@@ -41,6 +42,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var formats: RadioGroup
     private lateinit var updateStatus: TextView
     private lateinit var source: TextView
+    private lateinit var qualityHint: TextView
     private var settings = false
     private var draft = ""
     private var selectedFormat = "mp4"
@@ -58,6 +60,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         prefs = Preferences(this); selectedFormat = savedInstanceState?.getString("format") ?: prefs.format; draft = savedInstanceState?.getString("link").orEmpty()
         showPage(false); receive(intent)
+        network.execute { runCatching { Engine.initialize(applicationContext) } }
     }
     override fun onSaveInstanceState(outState: Bundle) { if (!settings) draft = link.text.toString(); outState.putString("link", draft); outState.putString("format", selectedFormat); super.onSaveInstanceState(outState) }
     override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); setIntent(intent); receive(intent) }
@@ -113,15 +116,20 @@ class MainActivity : ComponentActivity() {
         formats.check(if (selectedFormat == "mp3") R.id.format_mp3 else R.id.format_mp4)
         formats.setOnCheckedChangeListener { _, checked -> selectedFormat = if (checked == R.id.format_mp3) "mp3" else "mp4"; updateSource() }
         result.addView(formats)
-        result.addView(text(if (prefs.maximum) "Qualità massima · MP3 fino a 320 kbps" else "Qualità personalizzata nelle Impostazioni", 12f).apply { setTextColor(blue) })
+        qualityHint = text("", 12f).apply { setTextColor(blue) }; result.addView(qualityHint)
         download = button("Scarica sul telefono", true) { startTask("download") }; result.addView(download)
+        photos = button("Scarica foto da Instagram", true) {
+            val items = DownloadState.value.info?.photos.orEmpty()
+            if (items.size == 1) startTask("download", 0)
+            else if (items.isNotEmpty()) AlertDialog.Builder(this).setTitle("Scegli la foto da scaricare").setItems(items.mapIndexed { index, photo -> "Foto ${index + 1}${if (photo.width > 0 && photo.height > 0) " · ${photo.width}×${photo.height}" else ""}" }.toTypedArray()) { _, index -> startTask("download", index) }.show()
+        }; result.addView(photos)
         progress = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply { max = 100; visibility = View.GONE }; result.addView(progress, LinearLayout.LayoutParams(-1, dp(8)).apply { topMargin = dp(16) })
         status = text(""); status.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE; result.addView(status)
         cancel = button("Annulla operazione") { startService(Intent(this, DownloadService::class.java).setAction("cancel")) }; result.addView(cancel)
         open = button("Apri il file") { openSaved(false) }; result.addView(open)
         listen = button("Ascolta in Flusiva") { DownloadState.value.saved?.let { startActivity(Intent(this, MusicActivity::class.java).putExtra("play_uri", it.toString())) } }; result.addView(listen)
         share = button("Condividi il file") { openSaved(true) }; result.addView(share)
-        content.addView(text("YouTube · TikTok · Vimeo\nDailymotion · SoundCloud (solo MP3)", 12f).apply { gravity = Gravity.CENTER; setPadding(0, dp(24), 0, dp(8)) })
+        content.addView(text("YouTube · TikTok · Instagram · Facebook\nVimeo · Dailymotion · SoundCloud (solo MP3)", 12f).apply { gravity = Gravity.CENTER; setPadding(0, dp(24), 0, dp(8)) })
         content.addView(text("I file vengono salvati in Download/Flusiva. Usa contenuti tuoi o che puoi scaricare. Nessun account o server Flusiva.", 12f).apply { gravity = Gravity.CENTER })
         link.addTextChangedListener(object : TextWatcher { override fun beforeTextChanged(value: CharSequence?, start: Int, count: Int, after: Int) {}; override fun onTextChanged(value: CharSequence?, start: Int, before: Int, count: Int) { updateSource() }; override fun afterTextChanged(value: Editable?) {} })
         render(DownloadState.value)
@@ -132,6 +140,13 @@ class MainActivity : ComponentActivity() {
         MobileUi.text(source, item?.let { "Fonte riconosciuta: ${it.platform}${if (it.platform == "SoundCloud") " · solo audio" else ""}" } ?: if (link.text.isBlank()) "Fonte: verrà riconosciuta dal link" else "Fonte non riconosciuta: usa un link supportato")
         val state = DownloadState.value
         val ready = item != null && state.info?.let { item.url in listOf(it.url, it.sourceUrl) } == true
+        val hasPhotos = ready && state.info?.photos?.isNotEmpty() == true
+        MobileUi.text(qualityHint, if (hasPhotos) "Immagine originale · nessuna ricompressione" else if (prefs.maximum) "Qualità massima · MP3 fino a 320 kbps" else "Qualità personalizzata nelle Impostazioni")
+        photos.visibility = if (hasPhotos) View.VISIBLE else View.GONE
+        photos.isEnabled = hasPhotos && !state.busy
+        MobileUi.text(photos, "Scarica foto da Instagram${if (hasPhotos && state.info!!.photos.size > 1) " · ${state.info.photos.size} foto" else ""}")
+        formats.visibility = if (hasPhotos) View.GONE else View.VISIBLE
+        download.visibility = if (hasPhotos) View.GONE else View.VISIBLE
         if (item?.platform == "SoundCloud" && selectedFormat != "mp3") formats.check(R.id.format_mp3)
         formats.findViewById<RadioButton>(R.id.format_mp4).isEnabled = !state.busy && item?.platform != "SoundCloud" && (!ready || state.info?.hasVideo != false)
         formats.findViewById<RadioButton>(R.id.format_mp3).isEnabled = !state.busy && (!ready || state.info?.hasAudio != false)
@@ -147,13 +162,14 @@ class MainActivity : ComponentActivity() {
         progress.visibility = if (state.busy) View.VISIBLE else View.GONE; progress.isIndeterminate = state.percent == null; progress.progress = state.percent?.toInt() ?: 0
         cancel.visibility = if (state.busy) View.VISIBLE else View.GONE
         open.visibility = if (state.saved != null) View.VISIBLE else View.GONE; share.visibility = open.visibility
-        listen.visibility = open.visibility
+        listen.visibility = if (state.format in listOf("mp3", "mp4")) open.visibility else View.GONE
         formats.findViewById<RadioButton>(R.id.format_mp4).isEnabled = !state.busy && state.info?.hasVideo != false
         formats.findViewById<RadioButton>(R.id.format_mp3).isEnabled = !state.busy && state.info?.hasAudio != false
         if (state.info?.hasVideo == false && state.info.hasAudio) formats.check(R.id.format_mp3)
+        if (state.info?.hasAudio == false && state.info.hasVideo) formats.check(R.id.format_mp4)
         updateSource()
     }
-    private fun startTask(action: String) {
+    private fun startTask(action: String, photoIndex: Int? = null) {
         try {
             if (DownloadState.value.busy) return
             val identified = MediaPolicy.identify(link.text.toString())
@@ -161,14 +177,14 @@ class MainActivity : ComponentActivity() {
             if (action == "download") check(info != null && identified.url in listOf(info.url, info.sourceUrl)) { "Il link è cambiato. Analizzalo di nuovo." }
             if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 7)
             val job = Intent(this, DownloadService::class.java).setAction(action).putExtra("url", if (action == "download") info!!.url else identified.url)
-                .putExtra("format", selectedFormat).putExtra("maximum", prefs.maximum).putExtra("audio", prefs.audio).putExtra("video", prefs.video)
+                .putExtra("format", if (photoIndex == null) selectedFormat else "image").putExtra("photo", photoIndex ?: 0).putExtra("maximum", prefs.maximum).putExtra("audio", prefs.audio).putExtra("video", prefs.video)
             startForegroundService(job)
             DownloadState.set(DownloadState.value.copy(busy = true, message = "Preparazione…", saved = null, failed = false))
         } catch (error: Exception) { status.text = MediaPolicy.friendly(error); status.setTextColor(Color.rgb(170, 35, 50)) }
     }
     private fun openSaved(send: Boolean) {
         val state = DownloadState.value; val uri = state.saved ?: return
-        val type = if (state.format == "mp3") "audio/mpeg" else "video/mp4"
+        val type = MediaPolicy.mime(state.format)
         val intent = if (send) Intent(Intent.ACTION_SEND).setType(type).putExtra(Intent.EXTRA_STREAM, uri).apply { clipData = ClipData.newUri(contentResolver, "Flusiva", uri) } else Intent(Intent.ACTION_VIEW).setDataAndType(uri, type)
         try { startActivity(Intent.createChooser(intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), if (send) "Condividi con" else "Apri con")) } catch (_: ActivityNotFoundException) { Toast.makeText(this, "Nessuna app compatibile installata.", Toast.LENGTH_LONG).show() }
     }
@@ -187,7 +203,7 @@ class MainActivity : ComponentActivity() {
         updateStatus = text(""); updates.addView(updateStatus)
         updates.addView(button("Controlla aggiornamenti") { checkUpdates() })
         updates.addView(button("Apri Release ufficiale") { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/CosmoNetinfo/flusiva/releases/latest"))) })
-        val about = card(); about.addView(text("Sul tuo telefono", 21f, true)); about.addView(text("Download e conversione avvengono qui. I file restano in Download/Flusiva anche dopo la disinstallazione. Nessun database, pubblicità o telemetria.\n\nYouTube, TikTok, Vimeo, Dailymotion e SoundCloud. Spotify non è supportato.", 14f))
+        val about = card(); about.addView(text("Sul tuo telefono", 21f, true)); about.addView(text("Download e conversione avvengono qui. I file restano in Download/Flusiva anche dopo la disinstallazione. Nessun database, pubblicità o telemetria.\n\nYouTube, TikTok, Instagram, Facebook, Vimeo, Dailymotion e SoundCloud. Spotify non è supportato.", 14f))
         about.addView(button("Uso responsabile e licenze") { val message = assets.open("NOTICE.txt").bufferedReader().use { it.readText() }; AlertDialog.Builder(this).setTitle("Flusiva · GPL v3").setMessage(message).setPositiveButton("Chiudi", null).show() })
         about.addView(button("Ripristina preferenze") { prefs.reset(); selectedFormat = prefs.format; showPage(true) })
     }

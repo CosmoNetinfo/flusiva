@@ -2,7 +2,9 @@
 
 <img src="docs/brand/flusiva-wordmark.svg" alt="Flusiva" width="250">
 
-App per scaricare **video MP4 e audio MP3 da YouTube, TikTok, Vimeo, Dailymotion e SoundCloud**, con interfaccia in italiano. Windows, Linux, macOS (Intel e Apple Silicon) e Android 10+. Download e conversione avvengono sul dispositivo: nessun server remoto, account, hosting o database.
+App per scaricare **video MP4 e audio MP3 da YouTube, TikTok, Instagram, Facebook, Vimeo, Dailymotion e SoundCloud**, con interfaccia in italiano. Windows, Linux, macOS (Intel e Apple Silicon) e Android 10+. Download e conversione avvengono sul dispositivo: nessun server remoto, account, hosting o database.
+
+La **0.8.0** aggiunge video Instagram/Facebook e foto dei post Instagram. Sono riconosciuti anche i link `instagram.com/share/...` copiati dall’app e i link video Facebook condivisi.
 
 Flusiva è gratuito e open source, distribuito con licenza [GNU GPL v3](LICENSE). Su Android la versione 0.7 separa Scarica, Lettore, Playlist e Audio, con controlli musicali ridisegnati, feedback al tocco e fonte dei download esplicita. [Guida musica e playlist](docs/MUSIC.md).
 
@@ -48,11 +50,17 @@ Dirette in corso/programmate, playlist, video privati e contenuti che richiedono
 | --- | --- | --- |
 | YouTube | Video, Shorts, YouTube Music, `youtu.be` | MP4 e MP3 |
 | TikTok | Singolo video pubblico, `vm.tiktok.com`, `vt.tiktok.com`, `tiktok.com/t/` | MP4 e MP3 |
+| Instagram | Reel, post singoli `p/`, `tv/` e link `share/` pubblici | MP4, MP3 se la traccia è esposta, foto originali |
+| Facebook | Video, Reel, `watch?v=`, `fb.watch`, `share/v/` e `share/r/` pubblici | MP4 e MP3 se la traccia è esposta |
 | Vimeo | `vimeo.com/ID` e `player.vimeo.com/video/ID` pubblici | MP4 e MP3 |
 | Dailymotion | Singolo video, embed e `dai.ly` | MP4 e MP3 |
 | SoundCloud | Singola traccia pubblica e link brevi `on.soundcloud.com` | MP3 |
 
 Per SoundCloud viene selezionato MP3 e MP4 resta disabilitato. I link brevi sono risolti con controllo di ogni redirect, della piattaforma e del numero di passaggi. Le copertine sono accettate soltanto dai CDN delle piattaforme; se non disponibili viene mostrato il simbolo Flusiva.
+
+**Foto Instagram:** incollare il link del post e analizzarlo. Su Android compare **Scarica foto da Instagram**; nei caroselli si sceglie una foto per download. Sul desktop scegliere la foto nel selettore **Foto del post**. Viene salvato il file JPEG, PNG o WebP fornito dalla piattaforma, senza ridimensionarlo o ricomprimerlo. Le copertine dei video non vengono presentate come foto. Massimo 20 elementi nel post e 50 MiB per foto. Nella coda desktop un post fotografico salva la prima foto: per scegliere le altre usare il download singolo.
+
+**Tempi Android:** preparazione del motore in background, riuso dell’ultima analisi per 90 secondi se il contenuto non cambia e fino a quattro frammenti simultanei per i video segmentati. Le informazioni temporanee vengono eliminate con i file di lavoro. Non viene promessa una velocità minima: rete, sorgente e limitazioni della piattaforma influiscono sui tempi. Se Instagram/Facebook omettono la durata, viene verificata sul file prima del salvataggio; il limite resta di 6 ore.
 
 **Disponibilità:** nelle prove online del 24 novembre 2026 sono riusciti i download MP4 e MP3 da YouTube e Dailymotion e il download MP3 da SoundCloud, con tracce verificate tramite FFprobe e pulizia dei temporanei. Le richieste di prova a TikTok e Vimeo sono state limitate o hanno richiesto accesso: il loro supporto è implementato, ma non è stato verificato un download riuscito in questa sessione. Il funzionamento dipende da contenuto, rete e restrizioni della piattaforma. [Valutazione e verifiche](docs/PLATFORMS.md).
 
@@ -137,15 +145,15 @@ npm run dist
 
 Test online facoltativo: `node scripts/online-smoke.cjs`. Scarica il cortometraggio Creative Commons Big Buck Bunny della Blender Foundation in MP4 a risoluzione limitata e MP3, verifica le tracce con FFprobe e rimuove i temporanei. Richiede Internet e circa 70 MB di trasferimento; un URL alternativo autorizzato può essere passato come argomento. Per un contenuto solo audio viene verificato soltanto MP3. Non fa parte della CI per evitare dipendenza dai servizi esterni nei controlli deterministici.
 
-Sonde dei soli metadati: `node scripts/platform-smoke.cjs`. Controlla contenuti pubblici sulle cinque piattaforme senza scaricare i file multimediali e registra esiti e restrizioni in `test-results/platform-probes.json`. Un blocco remoto viene registrato come tale, non come successo.
+Sonde dei soli metadati: `node scripts/platform-smoke.cjs`. Controlla contenuti pubblici sulle sette piattaforme senza scaricare i file multimediali e registra esiti e restrizioni in `test-results/platform-probes.json`. Un blocco remoto viene registrato come tale, non come successo.
 
-Compilare sul sistema di destinazione. GitHub Actions esegue automaticamente i controlli, il test d'avvio Electron e la compilazione su quattro runner nativi. I 41 test deterministici non contattano i servizi esterni. Il test Electron verifica anche navigazione, preferenze via IPC, rifiuto di valori non validi, ripristino e presenza delle cinque piattaforme, con profilo isolato. Prima di una release pubblica verificare un download MP4 e MP3 reale su ciascun sistema con un video autorizzato.
+Compilare sul sistema di destinazione. GitHub Actions esegue automaticamente i controlli, il test d'avvio Electron e la compilazione su quattro runner nativi. I test deterministici non contattano i servizi esterni. Il test Electron verifica anche navigazione, preferenze via IPC, rifiuto di valori non validi, ripristino e presenza delle sette piattaforme, con profilo isolato. Prima di una release pubblica verificare un download MP4 e MP3 reale su ciascun sistema con un video autorizzato.
 
 Per pubblicare gli installer creare e inviare un tag coerente con `package.json`:
 
 ```sh
-git tag v0.7.1
-git push origin v0.7.1
+git tag v0.8.0
+git push origin v0.8.0
 ```
 
 Il workflow pubblica una GitHub Release solo quando tutte e quattro le build riescono. Prepara i feed Windows/Linux/macOS con SHA-512 e unisce le architetture Mac. Carica tutti i file in una bozza e la pubblica solo al termine. Include `SHA256SUMS.txt`. Nessun workflow Pages è necessario.
@@ -154,7 +162,7 @@ Il workflow pubblica una GitHub Release solo quando tutte e quattro le build rie
 
 * `desktop/`: processo Electron e bridge IPC ristretto, renderer in sandbox con isolamento del contesto, navigazione e permessi bloccati.
 * `public/`: interfaccia locale HTML/CSS/JavaScript con CSP, senza script remoti, telemetria o server HTTP.
-* `core/platforms.cjs`: riconoscimento dei cinque servizi, link brevi, metadati comuni e opzioni dei formati.
+* `core/platforms.cjs`: riconoscimento dei sette servizi, link brevi, metadati comuni e opzioni dei formati.
 * `core/settings.cjs` e `core/files.cjs`: preferenze locali validate, aggiornamenti atomici e salvataggio senza sovrascrittura.
 * `core/queue.cjs`: coda seriale, pausa, annullamento, tentativi e deduplicazione.
 * `core/progress.cjs` e `core/quality.cjs`: dati del trasferimento e politica di qualità massima.
@@ -171,7 +179,7 @@ Licenze dei componenti in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 Identità in blu, azzurro e bianco, con una F costruita da puntini. [Studio del logo e tre proposte](docs/BRAND.md), [tavola ad alta risoluzione](docs/brand/logo-study.png), [roadmap e piattaforme candidate](docs/ROADMAP.md), [note di rilascio](CHANGELOG.md) e [verifiche della versione](docs/VALIDATION.md).
 
-La versione 0.2.0 implementa TikTok, Vimeo, Dailymotion e SoundCloud; la 0.3.0 aggiunge coda, dati di avanzamento, qualità massima e controllo delle versioni. La 0.4 aggiunge gli aggiornamenti installabili su Windows/Linux e il percorso per macOS firmato. Restano in roadmap Instagram, certificati di firma e ripresa dei file parziali. Spotify è rimandato.
+La versione 0.2.0 implementa TikTok, Vimeo, Dailymotion e SoundCloud; la 0.3.0 aggiunge coda, dati di avanzamento, qualità massima e controllo delle versioni. La 0.4 aggiunge gli aggiornamenti installabili su Windows/Linux e il percorso per macOS firmato. La 0.8 aggiunge Instagram e Facebook. Restano in roadmap certificati di firma e ripresa dei file parziali. Spotify è rimandato.
 
 ## Risolvere un problema
 

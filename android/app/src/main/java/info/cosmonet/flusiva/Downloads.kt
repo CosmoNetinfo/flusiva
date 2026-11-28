@@ -22,7 +22,7 @@ object Downloads {
         val resolver = context.contentResolver
         val values = ContentValues().apply {
             put(MediaStore.Downloads.DISPLAY_NAME, MediaPolicy.fileName(title, format))
-            put(MediaStore.Downloads.MIME_TYPE, if (format == "mp3") "audio/mpeg" else "video/mp4")
+            put(MediaStore.Downloads.MIME_TYPE, MediaPolicy.mime(format))
             put(MediaStore.Downloads.RELATIVE_PATH, "${Environment.DIRECTORY_DOWNLOADS}/Flusiva")
             put(MediaStore.Downloads.IS_PENDING, 1)
         }

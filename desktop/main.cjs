@@ -31,9 +31,11 @@ else {
       validateDownload(format,quality,info);
       let result;
       try{
-        const destination=preferences.askWhereToSave?await dialog.showSaveDialog(window,{title:'Salva il download',defaultPath:join(preferences.downloadDirectory,safeFilename(info.title,format)),filters:[{name:format.toUpperCase(),extensions:[format]}]}):null;
+        if(format==='image')result=await downloader.download(info,format,quality,{signal,onProgress});
+        const extension=result?.extension||format;
+        const destination=preferences.askWhereToSave?await dialog.showSaveDialog(window,{title:'Salva il download',defaultPath:join(preferences.downloadDirectory,safeFilename(info.title,extension)),filters:[{name:extension.toUpperCase(),extensions:[extension]}]}):null;
         if(destination?.canceled||signal.aborted)return {cancelled:true};
-        result=await downloader.download(info,format,quality,{signal,onProgress});
+        result ||= await downloader.download(info,format,quality,{signal,onProgress});
         onProgress({phase:'saving',percent:null});
         if(signal.aborted)throw new Error('Operazione annullata.');
         let savedPath;
@@ -41,7 +43,7 @@ else {
           const staging=`${destination.filePath}.${randomUUID()}.flusiva-part`;
           try{await copyFile(result.path,staging);if(signal.aborted)throw new Error('Operazione annullata.');await require('node:fs/promises').rename(staging,destination.filePath);}finally{await unlink(staging).catch(()=>{});}
           savedPath=destination.filePath;
-        }else savedPath=await saveUnique(result.path,preferences.downloadDirectory,info.title,format);
+        }else savedPath=await saveUnique(result.path,preferences.downloadDirectory,info.title,extension);
         lastSaved=savedPath;
         if(preferences.openFolderAfterDownload)shell.showItemInFolder(savedPath);
         return {path:savedPath};
@@ -56,8 +58,8 @@ else {
       async run(job,{signal,onProgress}){
         const preferences=await settings.get();
         const info=await downloader.inspect(job.url,signal);
-        const format=info.hasVideo?job.requestedFormat:'mp3';
-        const quality=resolveQuality(format,format===job.requestedFormat?job.requestedQuality:preferences.audioQuality,preferences);
+        const format=info.photos?.length?'image':info.hasVideo?job.requestedFormat:'mp3';
+        const quality=resolveQuality(format,format==='image'?'0':format===job.requestedFormat?job.requestedQuality:preferences.audioQuality,preferences);
         onProgress({phase:'inspect',title:info.title,platformName:info.platformName,format,quality});
         return saveDownload(info,{format,quality},{signal,onProgress},preferences);
       }
@@ -147,9 +149,9 @@ else {
         const timer = setTimeout(() => app.exit(1),30_000);
         loaded.then(async () => {
           const result = await window.webContents.executeJavaScript(`(async () => ({ node: typeof require, about: await window.flusiva.about(), buttons: document.querySelectorAll('[data-format]').length, overflow: document.documentElement.scrollWidth > innerWidth }))()`);
-          if (result.node !== 'undefined' || !result.about.ok || result.buttons !== 2 || result.overflow) throw new Error(`Smoke test renderer: ${JSON.stringify(result)}`);
+          if (result.node !== 'undefined' || !result.about.ok || result.buttons !== 3 || result.overflow) throw new Error(`Smoke test renderer: ${JSON.stringify(result)}`);
           const preferencesCheck=await window.webContents.executeJavaScript(`(async()=>{
-            for(let attempt=0;attempt<100&&document.querySelectorAll('.platform-row').length!==5;attempt++)await new Promise(resolve=>setTimeout(resolve,25));
+            for(let attempt=0;attempt<100&&document.querySelectorAll('.platform-row').length!==${PLATFORMS.length};attempt++)await new Promise(resolve=>setTimeout(resolve,25));
             const original=await window.flusiva.getSettings();
             const saved=await window.flusiva.updateSettings({theme:'dark',defaultFormat:'mp3',audioQuality:'192'});
             const persisted=await window.flusiva.getSettings();
@@ -163,7 +165,14 @@ else {
             document.getElementById('nav-downloads').click();
             return {original:original.ok,saved:saved.ok,persisted:persisted.value?.theme==='dark'&&persisted.value?.audioQuality==='192',invalid:!invalid.ok,deniedPath:!deniedPath.ok,reset:reset.value?.theme==='light',navigation,platformCount};
           })()`);
-          if(Object.entries(preferencesCheck).some(([key,value])=>key==='platformCount'?value!==5:value!==true))throw new Error(`Smoke impostazioni: ${JSON.stringify(preferencesCheck)}`);
+          if(Object.entries(preferencesCheck).some(([key,value])=>key==='platformCount'?value!==PLATFORMS.length:value!==true))throw new Error(`Smoke impostazioni: ${JSON.stringify(preferencesCheck)}`);
+          const photosCheck=await window.webContents.executeJavaScript(`(()=>{
+            video={platform:'instagram',platformName:'Instagram',hasVideo:false,hasAudio:false,photos:[{width:1080,height:1350},{width:1080,height:1080}]};format='image';updateFormat();
+            const valid=!document.querySelector('[data-format="image"]').hidden&&document.querySelector('[data-format="mp4"]').disabled&&document.querySelector('[data-format="mp3"]').disabled&&document.getElementById('quality').options.length===2&&!document.getElementById('quality').disabled&&!document.getElementById('download-button').disabled;
+            document.getElementById('quality').value='1';const choice=document.getElementById('quality').value==='1';
+            video=null;format='mp4';updateFormat();return valid&&choice;
+          })()`);
+          if(!photosCheck)throw new Error('Smoke foto Instagram: scelta della foto o formati non coerenti.');
           const queueCheck=await window.webContents.executeJavaScript(`(async()=>{
             document.getElementById('queue-composer').open=true;
             document.getElementById('queue-links').value='https://vimeo.com/123\\nhttps://vimeo.com/456';

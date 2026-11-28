@@ -42,8 +42,11 @@ class DownloadService : Service() {
             var outcome: DownloadSnapshot
             try {
                 if (intent.action == "inspect") {
+                    Engine.initialize(this)
+                    DownloadState.set(DownloadState.value.copy(message = "Analisi di ${MediaPolicy.identify(intent.getStringExtra("url").orEmpty()).platform}…"))
                     val info = Engine.inspect(this, intent.getStringExtra("url").orEmpty(), cancelled::get)
-                    outcome = DownloadSnapshot(info = info, message = "${info.platform} · ${info.duration / 60}:${(info.duration % 60).toString().padStart(2, '0')} · pronto")
+                    val duration = if (info.photos.isNotEmpty()) "${info.photos.size} foto · scegli quella da salvare" else if (info.duration > 0) "${info.duration / 60}:${(info.duration % 60).toString().padStart(2, '0')}" else "durata non fornita · verifica sul file"
+                    outcome = DownloadSnapshot(info = info, message = "${info.platform} · $duration · pronto")
                 } else {
                     val info = DownloadState.value.info ?: error("Analizza prima un link.")
                     check(info.url == intent.getStringExtra("url")) { "Il link è cambiato. Analizzalo di nuovo." }
@@ -52,13 +55,14 @@ class DownloadService : Service() {
                     val audio = intent.getStringExtra("audio") ?: "320"
                     val video = intent.getStringExtra("video") ?: "best"
                     directory = File.createTempFile("download-", "", File(cacheDir, "transfers")).apply { delete(); mkdir() }
-                    val file = Engine.download(this, info, format, maximum, audio, video, directory, cancelled::get) { percent, message ->
+                    val file = Engine.download(this, info, format, maximum, audio, video, directory, cancelled::get, intent.getIntExtra("photo", 0)) { percent, message ->
                         DownloadState.set(DownloadState.value.copy(busy = true, percent = percent, message = message))
                         getSystemService(NotificationManager::class.java).notify(1, notification(message, percent))
                     }
                     DownloadState.set(DownloadState.value.copy(percent = null, message = "Salvataggio in Download/Flusiva…"))
-                    val uri = Downloads.save(this, file, info.title, format, cancelled::get)
-                    outcome = DownloadSnapshot(info = info, saved = uri, format = format, message = "Salvato in Download/Flusiva")
+                    val extension = if (format == "image") file.extension else format
+                    val uri = Downloads.save(this, file, info.title, extension, cancelled::get)
+                    outcome = DownloadSnapshot(info = info, saved = uri, format = extension, message = "Salvato in Download/Flusiva")
                 }
             } catch (error: Throwable) {
                 val message = if (cancelled.get()) "Operazione annullata." else MediaPolicy.friendly(error)

@@ -1,6 +1,6 @@
 {
   "name": "flusiva",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Video MP4 e audio MP3 dalle tue piattaforme preferite, sul tuo computer.",
   "author": "CosmoNet",
   "private": true,
@@ -70,7 +70,7 @@
       "category": "AudioVideo",
       "icon": "build/icon.png",
       "maintainer": "CosmoNet",
-      "synopsis": "Video MP4 e audio MP3 da cinque piattaforme"
+      "synopsis": "Video MP4 e audio MP3 da sette piattaforme"
     },
     "mac": {
       "target": [

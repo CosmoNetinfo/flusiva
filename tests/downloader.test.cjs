@@ -48,11 +48,14 @@ test('il motore trasferisce tutte le piattaforme e SoundCloud accetta solo audio
     for(const [url,id,platform,format]of [
       ['https://www.tiktok.com/@creator/video/7123456789012345678','7123456789012345678','tiktok','mp4'],
       ['https://vimeo.com/1234567','1234567','vimeo','mp4'],
+      ['https://www.instagram.com/reel/Chunk8-jurw/','Chunk8-jurw','instagram','mp4'],
+      ['https://www.facebook.com/reel/274175099429670/','274175099429670','facebook','mp4'],
       ['https://dai.ly/x123abc','x123abc','dailymotion','mp4'],
       ['https://soundcloud.com/artist/track','123456','soundcloud','mp3']
     ]) {
       let transfers=0;
       const downloader=createDownloader({toolsDir:'tools',tempRoot,runner:async(_exe,args)=>{
+        if(args.includes('-show_streams'))return JSON.stringify({format:{duration:'12'},streams:[{codec_type:'video'},{codec_type:'audio'}]});
         if(args.includes('--dump-single-json'))return JSON.stringify({id,duration:12,title:'Fixture',formats:[{ext:format==='mp3'?'m4a':'mp4',vcodec:format==='mp3'?'none':'avc1',acodec:'aac',height:format==='mp3'?undefined:720}]});
         transfers++;await writeFile(args[args.indexOf('-o')+1].replace('%(ext)s',format),'fixture');return '';
       }});
@@ -61,5 +64,18 @@ test('il motore trasferisce tutte le piattaforme e SoundCloud accetta solo audio
       const result=await downloader.download(info,format,format==='mp3'?'192':'best');assert.equal(transfers,1);await result.cleanup();
     }
     assert.deepEqual(await readdir(tempRoot),[]);
+  }finally{await rm(tempRoot,{recursive:true,force:true});}
+});
+test('un MP4 Meta senza video o troppo lungo viene rifiutato e ripulito',async()=>{
+  const tempRoot=await mkdtemp(join(tmpdir(),'flusiva-meta-test-'));
+  try{
+    for(const facts of [{format:{duration:'12'},streams:[{codec_type:'audio'}]},{format:{duration:'21601'},streams:[{codec_type:'video'}]},{format:{},streams:[{codec_type:'video'}]}]){
+      const downloader=createDownloader({toolsDir:'tools',tempRoot,runner:async(_exe,args)=>{
+        if(args.includes('-show_streams'))return JSON.stringify(facts);
+        await writeFile(args[args.indexOf('-o')+1].replace('%(ext)s','mp4'),'fixture');return '';
+      }});
+      await assert.rejects(downloader.download({url:'https://instagram.com/reel/Chunk8-jurw/',hasAudio:false,hasVideo:true},'mp4','best'));
+      assert.deepEqual(await readdir(tempRoot),[]);
+    }
   }finally{await rm(tempRoot,{recursive:true,force:true});}
 });

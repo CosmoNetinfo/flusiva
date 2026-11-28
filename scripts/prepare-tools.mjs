@@ -1,5 +1,5 @@
 import { createRequire } from 'node:module';
-import { mkdir, writeFile, readFile, copyFile, chmod, readdir } from 'node:fs/promises';
+import { mkdir, writeFile, readFile, copyFile, chmod, readdir, cp } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,6 +17,7 @@ const assets = {
 const entry = assets[`${process.platform}-${process.arch}`];
 if (!entry) throw new Error('Piattaforma non supportata: usare Windows/Linux x64 oppure macOS x64/arm64.');
 await mkdir(vendor,{ recursive:true });
+await cp(join(root,'extractor-plugins'),join(vendor,'plugins'),{recursive:true});
 const exe = process.platform === 'win32' ? '.exe' : '';
 const ytPath = join(vendor,`yt-dlp${exe}`);
 let downloaded;

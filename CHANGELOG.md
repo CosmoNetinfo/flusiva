@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.8.0 — 2026-11-28
+
+* MP4 da Reel e video pubblici Instagram e Facebook, inclusi link Instagram `share/`, Facebook `share/v/`, `share/r/` e `fb.watch` con redirect controllati.
+* Foto dei post Instagram: selezione nei caroselli, file JPEG/PNG/WebP senza ricompressione e distinzione esplicita dalle copertine video tramite un’estensione del motore inclusa nell’app.
+* Dati Meta incompleti: durata e codec assenti non bloccano un video valido. Le tracce e il limite di durata sono verificati sul file prodotto.
+* Android: preparazione del motore in background, riuso dei metadati per 90 secondi e quattro frammenti paralleli quando disponibili. Nuova analisi dopo scadenza o cambio del contenuto.
+* Indicazioni di fonte/formato, elenco di sette piattaforme e controlli foto su Android e desktop. Test aggiunti per link, immagini, stato UI, salvataggio e metadati recenti.
+
 ## 0.7.1 — 2026-11-25
 
 * Stati visivi coerenti per icone disabilitate e comandi selezionati.

@@ -3,6 +3,7 @@ import {createHash} from 'node:crypto';
 import {join} from 'node:path';
 const directory=new URL('../vendor-android/',import.meta.url);
 await mkdir(directory,{recursive:true});
+await copyFile(new URL('../extractor-plugins/flusiva/yt_dlp_plugins/extractor/flusiva.py',import.meta.url),new URL('flusiva.py',directory));
 const sdk=process.env.ANDROID_HOME||process.env.ANDROID_SDK_ROOT||(process.platform==='win32'?join(process.env.LOCALAPPDATA,'Android','Sdk'):null);
 if(!sdk)throw new Error('Configura ANDROID_HOME e installa NDK 27.0.12077973.');
 const host=process.platform==='win32'?'windows-x86_64':process.platform==='darwin'?'darwin-x86_64':'linux-x86_64';

@@ -1,6 +1,7 @@
 const { spawn } = require('node:child_process');
 const { join } = require('node:path');
-const { mkdtemp, readdir, rm, stat } = require('node:fs/promises');
+const { mkdtemp, readdir, rm, stat,writeFile } = require('node:fs/promises');
+const {fetchPhoto}=require('./photos.cjs');
 const { identify,resolveLink,summarize,downloadOptions,friendlyError } = require('./platforms.cjs');
 const {PROGRESS_TEMPLATE,parseProgress}=require('./progress.cjs');
 
@@ -41,13 +42,13 @@ function runTool(executable, args, { signal, onLine = () => {}, timeout = 90_000
 
 function createDownloader({ toolsDir, tempRoot, nodePath = process.execPath, runner = runTool }) {
   const yt = join(toolsDir, process.platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp');
-  const common = ['--ignore-config','--no-playlist','--no-cache-dir','--no-warnings','--socket-timeout','25','--retries','3','--ffmpeg-location',toolsDir,'--js-runtimes',`node:${nodePath}`];
+  const common = ['--ignore-config','--no-plugin-dirs','--plugin-dirs',join(toolsDir,'plugins'),'--no-playlist','--no-cache-dir','--no-warnings','--socket-timeout','25','--retries','3','--ffmpeg-location',toolsDir,'--js-runtimes',`node:${nodePath}`];
   const env = { ...process.env, ELECTRON_RUN_AS_NODE: '1' };
   return {
     async inspect(value, signal) {
       const item=await resolveLink(value,{signal});
       let info;
-      try { info=JSON.parse(await runner(yt,[...common,'--dump-single-json','--skip-download','--',item.url],{signal,env})); }
+      try { info=JSON.parse(await runner(yt,[...common,...(item.platform==='instagram'?['--ignore-no-formats-error']:[]),'--dump-single-json','--skip-download','--',item.url],{signal,env})); }
       catch(error){throw new Error(friendlyError(error.message,item.platform));}
       return summarize(info,item);
     },
@@ -58,6 +59,13 @@ function createDownloader({ toolsDir, tempRoot, nodePath = process.execPath, run
       const options = downloadOptions(format, quality,info);
       const directory = await mkdtemp(join(tempRoot, 'flusiva-'));
       try {
+        if(format==='image'){
+          const {bytes,extension}=await fetchPhoto(info.photos[Number(quality)].url,{signal});
+          const path=join(directory,`media.${extension}`);await writeFile(path,bytes);
+          const probe=JSON.parse(await runner(join(toolsDir,process.platform==='win32'?'ffprobe.exe':'ffprobe'),['-v','error','-show_streams','-of','json',path],{signal,env,timeout:30_000}));
+          if(!probe.streams?.some(s=>['mjpeg','png','webp'].includes(s.codec_name)&&s.width>0&&s.height>0))throw new Error('Il file ricevuto non è un’immagine valida.');
+          return {path,extension,cleanup:()=>rm(directory,{recursive:true,force:true})};
+        }
         await runner(yt, [...common,...options,'--newline','--progress','--progress-delta','0.5','--progress-template',PROGRESS_TEMPLATE,'--max-filesize','8G','-o',join(directory,'media.%(ext)s'),'--',url], {
           env, signal, timeout: 2 * 60 * 60 * 1000,
           onLine(line) {
@@ -70,6 +78,11 @@ function createDownloader({ toolsDir, tempRoot, nodePath = process.execPath, run
         const names = await readdir(directory);
         const filename = names.find(name => name === `media.${format}`);
         if (!filename || !(await stat(join(directory,filename))).size) throw new Error('Nessun file prodotto');
+        if(['instagram','facebook'].includes(item.platform)) {
+          const probe=JSON.parse(await runner(join(toolsDir,process.platform==='win32'?'ffprobe.exe':'ffprobe'),['-v','error','-show_streams','-show_format','-of','json',join(directory,filename)],{signal,env,timeout:30_000}));
+          const duration=Number(probe.format?.duration);
+          if(!Number.isFinite(duration)||duration<=0||duration>21600||!probe.streams?.some(stream=>stream.codec_type===(format==='mp4'?'video':'audio')))throw new Error('Il file non contiene la traccia richiesta o supera la durata massima di 6 ore.');
+        }
         return { path: join(directory,filename), cleanup: () => rm(directory,{ recursive: true, force: true }) };
       } catch (error) {
         await rm(directory, { recursive: true, force: true });

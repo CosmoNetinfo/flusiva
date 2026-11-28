@@ -14,7 +14,7 @@ Scaricare `Flusiva-VERSIONE-android.apk` dalle [Release ufficiali](https://githu
 2. Premere **Analizza il link**, scegliere Video MP4 o Audio MP3 e **Scarica sul telefono**.
 3. Il file viene salvato in **Download/Flusiva**. Si può aprire o condividere dall’app.
 
-YouTube, TikTok, Vimeo e Dailymotion offrono MP4/MP3; SoundCloud solo MP3. Nessun supporto Spotify, download di playlist delle piattaforme, dirette, contenuti con DRM, account o importazione cookie. Le playlist locali di ascolto sono disponibili dalla 0.6. Restrizioni e disponibilità dipendono dalle piattaforme; le verifiche desktop non dimostrano automaticamente il funzionamento su ogni telefono o rete.
+YouTube, TikTok, Instagram, Facebook, Vimeo e Dailymotion offrono MP4/MP3; SoundCloud solo MP3. Nessun supporto Spotify, download di playlist delle piattaforme, dirette, contenuti con DRM, account o importazione cookie. Le playlist locali di ascolto sono disponibili dalla 0.6. Restrizioni e disponibilità dipendono dalle piattaforme; le verifiche desktop non dimostrano automaticamente il funzionamento su ogni telefono o rete.
 
 La qualità massima è attiva inizialmente: cerca la migliore sorgente video/audio disponibile e converte MP3 a 320 kbps. Non può migliorare la qualità della sorgente. Disattivarla nelle Impostazioni per scegliere un limite di risoluzione o un bitrate diverso. MP4 può contenere codec che il lettore del telefono non supporta.
 
@@ -24,7 +24,13 @@ I file sono pubblicati tramite MediaStore, senza accesso generale alla memoria o
 
 In **Impostazioni → Aggiornamenti** si controlla la nuova versione e si apre la Release per il download manuale dell’APK. Android chiede la conferma prima dell’installazione. Per aggiornare un’app già installata il nuovo APK deve avere lo stesso identificativo e la stessa firma.
 
-## Musica e playlist dalla 0.6
+## Instagram, Facebook e foto dalla 0.8
+
+Incollare un link video/Reel Instagram o Facebook, anche dai pulsanti Condividi delle piattaforme, e usare **Analizza il link**. La pagina indica la fonte e il pulsante **Scarica MP4 da Instagram/Facebook**. I post Instagram fotografici mostrano invece **Scarica foto da Instagram**; per i caroselli si sceglie la foto da salvare. Immagini originali JPEG/PNG/WebP in Download/Flusiva, senza ricompressione. **Apri il file** e **Condividi il file** usano il tipo immagine corretto.
+
+Il motore viene preparato in background all’apertura. Un download avviato entro 90 secondi dall’analisi dello stesso contenuto riusa i metadati temporanei; dopo la scadenza esegue una nuova estrazione. Per i flussi segmentati usa al massimo quattro frammenti contemporaneamente. Le attese di rete o imposte dal servizio restano possibili; non è stata misurata una percentuale di accelerazione su un telefono fisico.
+
+## Lettore e playlist
 
 Aprire **Musica** per ascoltare i file scaricati o importati, creare playlist persistenti e continuare l’ascolto in background. Le pagine **Lettore**, **Playlist** e **Audio** separano riproduzione, libreria e impostazioni audio. Include dati di qualità del file, decoder, equalizzatore del dispositivo e timer. [Guida del lettore musicale](MUSIC.md).
 
