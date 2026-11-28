@@ -1,6 +1,6 @@
 # Verifiche della prima versione
 
-## Instagram, Facebook e foto — 0.8.0
+## Instagram, Facebook e foto — 0.8.1
 
 * 48 test Node riusciti: link diretti/condivisi, rifiuto di host ingannevoli, redirect nella stessa piattaforma, metadati Meta incompleti, controllo del file MP4 e pulizia in caso di durata o tracce non valide. Test foto per scelta del candidato maggiore, distinzione da copertine video, URL CDN, contenuto immagine, limite di dimensione e annullamento.
 * Build Android, test JVM e Lint locali riusciti con JDK 17. Test aggiunti per riconoscimento di Instagram/Facebook, URI condivisi e mancato riuso di un’analisi per un altro contenuto o dopo la scadenza di 90 secondi.

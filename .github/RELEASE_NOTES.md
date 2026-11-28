@@ -1,4 +1,4 @@
-**Flusiva 0.8.0** aggiunge MP4 da Instagram e Facebook e foto dei post Instagram. Download sul dispositivo, senza server Flusiva. GPL-3.0-only.
+**Flusiva 0.8.1** aggiunge MP4 da Instagram e Facebook e foto dei post Instagram. Download sul dispositivo, senza server Flusiva. GPL-3.0-only.
 
 ### Instagram e Facebook
 
@@ -15,7 +15,7 @@
 
 ### Installazione
 
-**Android 10+: Flusiva-0.8.0-android.apk**. APK universale ARM64, ARMv7 e x86_64, firmato con la stessa chiave: aggiornare senza disinstallare per conservare playlist e preferenze.
+**Android 10+: Flusiva-0.8.1-android.apk**. APK universale ARM64, ARMv7 e x86_64, firmato con la stessa chiave: aggiornare senza disinstallare per conservare playlist e preferenze.
 
 Installer inclusi per Windows x64, Linux x64, Mac Intel e Apple Silicon. Windows/Linux mantengono gli aggiornamenti compatibili; su Mac non firmato il controllo apre il download manuale della Release.
 

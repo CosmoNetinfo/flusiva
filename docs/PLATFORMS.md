@@ -1,4 +1,4 @@
-# Valutazione delle piattaforme — 0.8.0
+# Valutazione delle piattaforme — 0.8.1
 
 Aggiornamento del 28 novembre 2026: sette servizi con metadati comuni e processi locali yt-dlp/FFmpeg. Le prove delle cinque piattaforme iniziali risalgono al 24 novembre; Instagram e Facebook sono stati provati il 28 novembre. La presenza di un estrattore non garantisce il funzionamento di tutti i link: [avvertenza upstream ed elenco ufficiale](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md).
 

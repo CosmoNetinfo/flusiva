@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.1 — 2026-11-28
+
+* Prima pubblicazione delle funzioni 0.8; nomi Instagram/Facebook visibili anche mentre gli elementi della coda attendono l’analisi. I download fotografici sono indicati come FOTO.
+* La build 0.8.0 è stata interrotta prima della pubblicazione per includere questa correzione.
+
 ## 0.8.0 — 2026-11-28
 
 * MP4 da Reel e video pubblici Instagram e Facebook, inclusi link Instagram `share/`, Facebook `share/v/`, `share/r/` e `fb.watch` con redirect controllati.

@@ -36,7 +36,7 @@
       const record=rows.get(job.id)||createRow(job);
       if(!record.row.isConnected)el('queue-list').append(record.row);
       record.number.textContent=String(index+1);record.title.textContent=job.title;record.title.title=job.title;
-      record.detail.textContent=`${job.platformName||({youtube:'YouTube',tiktok:'TikTok',vimeo:'Vimeo',soundcloud:'SoundCloud',dailymotion:'Dailymotion'})[job.platform]} · ${job.format.toUpperCase()} · ${labels[job.status]}`;
+      record.detail.textContent=`${job.platformName||({youtube:'YouTube',tiktok:'TikTok',instagram:'Instagram',facebook:'Facebook',vimeo:'Vimeo',soundcloud:'SoundCloud',dailymotion:'Dailymotion'})[job.platform]} · ${job.format==='image'?'FOTO':job.format.toUpperCase()} · ${labels[job.status]}`;
       record.row.dataset.status=job.status;
       record.meter.hidden=!value.runningId||value.runningId!==job.id;
       if(job.progress?.phase==='download'&&job.progress.percent!==null)record.meter.value=job.progress.percent;else record.meter.removeAttribute('value');

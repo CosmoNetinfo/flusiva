@@ -4,7 +4,7 @@
 
 App per scaricare **video MP4 e audio MP3 da YouTube, TikTok, Instagram, Facebook, Vimeo, Dailymotion e SoundCloud**, con interfaccia in italiano. Windows, Linux, macOS (Intel e Apple Silicon) e Android 10+. Download e conversione avvengono sul dispositivo: nessun server remoto, account, hosting o database.
 
-La **0.8.0** aggiunge video Instagram/Facebook e foto dei post Instagram. Sono riconosciuti anche i link `instagram.com/share/...` copiati dall’app e i link video Facebook condivisi.
+La **0.8.1** aggiunge video Instagram/Facebook e foto dei post Instagram. Sono riconosciuti anche i link `instagram.com/share/...` copiati dall’app e i link video Facebook condivisi.
 
 Flusiva è gratuito e open source, distribuito con licenza [GNU GPL v3](LICENSE). Su Android la versione 0.7 separa Scarica, Lettore, Playlist e Audio, con controlli musicali ridisegnati, feedback al tocco e fonte dei download esplicita. [Guida musica e playlist](docs/MUSIC.md).
 
@@ -152,8 +152,8 @@ Compilare sul sistema di destinazione. GitHub Actions esegue automaticamente i c
 Per pubblicare gli installer creare e inviare un tag coerente con `package.json`:
 
 ```sh
-git tag v0.8.0
-git push origin v0.8.0
+git tag v0.8.1
+git push origin v0.8.1
 ```
 
 Il workflow pubblica una GitHub Release solo quando tutte e quattro le build riescono. Prepara i feed Windows/Linux/macOS con SHA-512 e unisce le architetture Mac. Carica tutti i file in una bozza e la pubblica solo al termine. Include `SHA256SUMS.txt`. Nessun workflow Pages è necessario.

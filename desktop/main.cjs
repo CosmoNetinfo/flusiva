@@ -175,11 +175,13 @@ else {
           if(!photosCheck)throw new Error('Smoke foto Instagram: scelta della foto o formati non coerenti.');
           const queueCheck=await window.webContents.executeJavaScript(`(async()=>{
             document.getElementById('queue-composer').open=true;
-            document.getElementById('queue-links').value='https://vimeo.com/123\\nhttps://vimeo.com/456';
+            document.getElementById('queue-links').value='https://instagram.com/share/BAWVJE-rtk\\nhttps://facebook.com/reel/123456/';
             document.getElementById('queue-form').requestSubmit();
             let snapshot;
             for(let attempt=0;attempt<100;attempt++){snapshot=(await window.flusiva.getQueue()).value;if(snapshot.items.length===2&&document.querySelectorAll('.queue-row').length===2)break;await new Promise(resolve=>setTimeout(resolve,20));}
             const added=snapshot.items.length===2&&snapshot.paused&&document.querySelectorAll('.queue-row').length===2;
+            const names=document.getElementById('queue-list').textContent;
+            const platforms=names.includes('Instagram')&&names.includes('Facebook')&&!names.includes('undefined');
             const invalid=await window.flusiva.addToQueue({urls:['https://evil.test/video'],format:'mp4',quality:'best'});
             await window.flusiva.cancelQueueItem(snapshot.items[0].id);
             await window.flusiva.retryQueueItem(snapshot.items[0].id);
@@ -193,7 +195,7 @@ else {
             const refusedInstall=await window.flusiva.installUpdate();
             const updater=updateState.ok&&updateState.value.mode==='manual'&&!refusedInstall.ok;
             window.scrollTo(0,0);
-            return {added,invalid:!invalid.ok,retried,cleared,controls,updater};
+            return {added,invalid:!invalid.ok,retried,cleared,controls,updater,platforms};
           })()`);
           if(Object.values(queueCheck).some(value=>value!==true))throw new Error(`Smoke coda: ${JSON.stringify(queueCheck)}`);
           const { execFileSync } = require('node:child_process');
