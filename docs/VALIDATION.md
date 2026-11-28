@@ -6,6 +6,8 @@
 * Fixture VP9 sintetica inclusa soltanto nell’APK dei test: il Reel dell’utente non è distribuito. Le prove su emulatore verificano accettazione MP4 VP9, rifiuto come file audio, rifiuto di un MP4 corrotto e mantenimento dei controlli della durata.
 * Aggiornamento APK: test JVM di versioni stabili, ordinamento numerico e checksum non ambiguo. Test Android con l’APK reale installato, hash/versione/package errati e un APK senza codice con stessa identità/versione ma firma estranea. FileProvider confinato alla cartella degli aggiornamenti. Prova UI della disponibilità del download e dell’assenza del comando Installa prima della verifica.
 * Il trasferimento dell’APK usa DownloadManager e la sua notifica di sistema, con ID persistente e ripresa dello stato alla riapertura. L’installazione resta una conferma Android esplicita. Non viene dichiarata una prova di sostituzione completa dell’app su un telefono fisico in questa sessione.
+* Sul tag `v0.9.1` tutti i 7 test strumentati Android 15 sono riusciti, inclusi VP9, MP4 corrotto, uso dell’info-json, firme APK e UI aggiornamenti; 102 secondi complessivi. Confermati i precedenti controlli di foto, playlist e riproduzione a schermo spento. Compilazione, 11 test JVM e Lint riusciti. [Esecuzione Actions](https://github.com/CosmoNetinfo/flusiva/actions/runs/46180639532).
+* La 0.9.0 non è stata pubblicata: la prima prova ha segnalato l’assenza del percorso delle librerie Python condivise richieste da FFprobe. Il percorso ora coincide con quello del runtime già usato dal motore, e la ripetizione del test completo ha avuto esito positivo.
 
 ## Instagram, Facebook e foto — 0.8.1
 
