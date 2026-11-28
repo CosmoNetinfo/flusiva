@@ -37,3 +37,5 @@ Il link dello screenshot `instagram.com/share/BAWVJE-rtk` è stato risolto onlin
 ## Riprodurre le verifiche
 
 `npm test` per le verifiche deterministiche. `node scripts/platform-smoke.cjs` per sonde online dei metadati; i risultati sono in `test-results/platform-probes.json`. `node scripts/online-smoke.cjs URL` per un download completo MP4 e MP3 di un contenuto video autorizzato, o solo MP3 se il contenuto è audio. Le prove online dipendono dallo stato dei servizi e non fanno parte della CI.
+
+Per ripetere le tre prove Meta: `node scripts/platform-smoke.cjs instagram facebook instagram-photo --download-mp4`. Il comando salva gli esiti in `test-results/platform-downloads.json`, verifica i file con FFprobe e rimuove i temporanei. Il parametro storico `--download-mp4` scarica il file immagine originale quando la sonda è `instagram-photo`.

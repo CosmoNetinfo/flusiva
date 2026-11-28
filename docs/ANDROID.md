@@ -30,6 +30,10 @@ Incollare un link video/Reel Instagram o Facebook, anche dai pulsanti Condividi 
 
 Il motore viene preparato in background all’apertura. Un download avviato entro 90 secondi dall’analisi dello stesso contenuto riusa i metadati temporanei; dopo la scadenza esegue una nuova estrazione. Per i flussi segmentati usa al massimo quattro frammenti contemporaneamente. Le attese di rete o imposte dal servizio restano possibili; non è stata misurata una percentuale di accelerazione su un telefono fisico.
 
+Schermate reali della 0.8.1 su emulatore Android 15. Il pannello delle foto usa una fixture locale dichiarata; la prova del download online del JPEG è documentata separatamente in [PLATFORMS.md](PLATFORMS.md).
+
+<p><img src="images/android-instagram.png" alt="Link condiviso Instagram riconosciuto prima dell’analisi" width="280"> <img src="images/android-facebook.png" alt="Link Facebook riconosciuto con comando Scarica MP4 da Facebook" width="280"> <img src="images/android-photos.png" alt="Post fotografico di prova con scelta delle foto e download senza ricompressione" width="280"></p>
+
 ## Lettore e playlist
 
 Aprire **Musica** per ascoltare i file scaricati o importati, creare playlist persistenti e continuare l’ascolto in background. Le pagine **Lettore**, **Playlist** e **Audio** separano riproduzione, libreria e impostazioni audio. Include dati di qualità del file, decoder, equalizzatore del dispositivo e timer. [Guida del lettore musicale](MUSIC.md).

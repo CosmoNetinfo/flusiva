@@ -1,0 +1,67 @@
+{
+  "checkedAt": "2026-11-28T18:38:20.527Z",
+  "environment": "Windows x64, yt-dlp 2026.11.23 e FFprobe inclusi in Flusiva",
+  "temporaryFilesRemoved": true,
+  "results": [
+    {
+      "platform": "instagram",
+      "source": "https://www.instagram.com/reel/Chunk8-jurw/",
+      "status": "ok",
+      "metadataDuration": null,
+      "file": {
+        "extension": "mp4",
+        "bytes": 1950833,
+        "duration": 4.966667,
+        "streams": [
+          {
+            "codec_type": "video",
+            "codec_name": "h264",
+            "width": 720,
+            "height": 1280
+          }
+        ]
+      }
+    },
+    {
+      "platform": "facebook",
+      "source": "https://www.facebook.com/video.php?v=274175099429670",
+      "status": "ok",
+      "metadataDuration": 131.03,
+      "file": {
+        "extension": "mp4",
+        "bytes": 4541117,
+        "duration": 131.030204,
+        "streams": [
+          {
+            "codec_type": "video",
+            "codec_name": "h264",
+            "width": 400,
+            "height": 300
+          },
+          {
+            "codec_type": "audio",
+            "codec_name": "aac"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "instagram-photo",
+      "source": "https://www.instagram.com/p/BqvsDleB3lV/",
+      "status": "ok",
+      "metadataDuration": null,
+      "file": {
+        "extension": "jpg",
+        "bytes": 383468,
+        "streams": [
+          {
+            "codec_type": "video",
+            "codec_name": "mjpeg",
+            "width": 1080,
+            "height": 1350
+          }
+        ]
+      }
+    }
+  ]
+}

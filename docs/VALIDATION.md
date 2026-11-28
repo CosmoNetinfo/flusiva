@@ -3,10 +3,12 @@
 ## Instagram, Facebook e foto — 0.8.1
 
 * 48 test Node riusciti: link diretti/condivisi, rifiuto di host ingannevoli, redirect nella stessa piattaforma, metadati Meta incompleti, controllo del file MP4 e pulizia in caso di durata o tracce non valide. Test foto per scelta del candidato maggiore, distinzione da copertine video, URL CDN, contenuto immagine, limite di dimensione e annullamento.
-* Build Android, test JVM e Lint locali riusciti con JDK 17. Test aggiunti per riconoscimento di Instagram/Facebook, URI condivisi e mancato riuso di un’analisi per un altro contenuto o dopo la scadenza di 90 secondi.
+* Build Android, 9 test JVM e Lint locali riusciti con JDK 17. Test aggiunti per riconoscimento di Instagram/Facebook, URI condivisi e mancato riuso di un’analisi per un altro contenuto o dopo la scadenza di 90 secondi.
 * App Electron reale: test d’avvio con sette piattaforme e nuova scelta delle foto, qualità selezionabile anche in modalità qualità massima, MP4/MP3 disabilitati per post fotografici.
 * Prove online Windows con il motore incluso: MP4 Instagram e Facebook e JPEG Instagram trasferiti completamente e verificati con FFprobe. Dettagli e limiti in [PLATFORMS.md](PLATFORMS.md). Il link `share/` dello screenshot è stato risolto nel Reel di destinazione.
 * Android su emulatore: aggiunti controlli UI per fonte e formato Meta, selezione di foto da fixture esplicitamente locale, MIME e salvataggio dell’immagine. La conversione nativa di prova usa un info-json, senza un secondo URL di estrazione. Gli esiti CI vengono verificati prima della pubblicazione.
+* Verifica del tag `v0.8.1`: tutti i 5 test strumentati su Android 15 riusciti (70 secondi complessivi), inclusi i controlli precedenti di playlist e ascolto a schermo spento. Screenshot Instagram, Facebook e foto ispezionati e inclusi nella guida. Build native Windows, Linux, Mac Intel e Mac Apple Silicon riuscite nella stessa [esecuzione Actions](https://github.com/CosmoNetinfo/flusiva/actions/runs/46177213875).
+* Esiti delle prove online, senza URL CDN o token temporanei: [JSON di verifica](evidence/meta-downloads-2026-11-28.json).
 * Non è stata misurata una percentuale di accelerazione su un telefono fisico. Le prove online Windows non sostituiscono quelle su tutte le reti e i dispositivi Android.
 
 ## Interfaccia Android 0.7.1
