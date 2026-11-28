@@ -4,7 +4,7 @@
 
 App per scaricare **video MP4 e audio MP3 da YouTube, TikTok, Instagram, Facebook, Vimeo, Dailymotion e SoundCloud**, con interfaccia in italiano. Windows, Linux, macOS (Intel e Apple Silicon) e Android 10+. Download e conversione avvengono sul dispositivo: nessun server remoto, account, hosting o database.
 
-La **0.8.1** aggiunge video Instagram/Facebook e foto dei post Instagram. Sono riconosciuti anche i link `instagram.com/share/...` copiati dall’app e i link video Facebook condivisi.
+La **0.9.0** corregge su Android la verifica dei video MP4 con codec come VP9 e aggiunge download e installazione degli aggiornamenti dall’app. Restano disponibili video Instagram/Facebook e foto dei post Instagram, inclusi i link `instagram.com/share/...` copiati dall’app.
 
 Flusiva è gratuito e open source, distribuito con licenza [GNU GPL v3](LICENSE). Su Android la versione 0.7 separa Scarica, Lettore, Playlist e Audio, con controlli musicali ridisegnati, feedback al tocco e fonte dei download esplicita. [Guida musica e playlist](docs/MUSIC.md).
 
@@ -104,7 +104,7 @@ La qualità massima seleziona la migliore sorgente esposta dal servizio, senza p
 
 ## Aggiornamenti automatici
 
-Con l’opzione attiva, l’app controlla la Release stabile ufficiale circa 10 secondi dopo l’avvio e ogni 6 ore mentre rimane aperta. Scarica in background una versione successiva e mostra l’avanzamento in **Impostazioni → Aggiornamenti**. **Riavvia e installa** è disponibile soltanto quando non ci sono download o elementi della coda da completare. Un errore di rete o checksum lascia utilizzabile la versione corrente e permette di riprovare.
+Su desktop, con l’opzione attiva, l’app controlla la Release stabile ufficiale circa 10 secondi dopo l’avvio e ogni 6 ore mentre rimane aperta. Scarica in background una versione successiva e mostra l’avanzamento in **Impostazioni → Aggiornamenti**. **Riavvia e installa** è disponibile soltanto quando non ci sono download o elementi della coda da completare. Un errore di rete o checksum lascia utilizzabile la versione corrente e permette di riprovare.
 
 | Sistema | Comportamento dalla 0.4 |
 | --- | --- |
@@ -115,6 +115,10 @@ Con l’opzione attiva, l’app controlla la Release stabile ufficiale circa 10 
 | Avvio dal sorgente | Solo controllo della versione e collegamento alla Release; nessuna installazione automatica |
 
 Disattivando l’opzione e salvando le preferenze si fermano i controlli periodici e l’installazione alla chiusura; un trasferimento già iniziato può terminare. Si possono usare **Controlla aggiornamenti**, **Scarica aggiornamento** e **Riavvia e installa** per procedere esplicitamente.
+
+**Android dalla 0.9:** nelle **Impostazioni**, usare **Controlla aggiornamenti → Scarica aggiornamento → Installa aggiornamento**. Android gestisce il download anche quando la schermata è chiusa; prima dell’installazione Flusiva verifica SHA-256, package, versione e firma dell’APK. Se richiesto, consentire l’installazione da Flusiva nelle impostazioni Android e tornare all’app. La conferma di installazione rimane del sistema. Controllo all’avvio disattivabile e limitato a una volta al giorno; download dell’APK avviato dall’utente. L’installazione viene rinviata durante un download di contenuti.
+
+Chi usa Android 0.8.1 o precedente deve installare manualmente la 0.9 una volta, senza disinstallare: le vecchie versioni aprono soltanto la pagina Release. Gli aggiornamenti successivi si gestiscono dall’app.
 
 Il feed è fissato al repository ufficiale CosmoNetinfo/flusiva, via HTTPS. electron-updater verifica il checksum SHA-512 del pacchetto prima di dichiararlo pronto. I checksum verificano l’integrità rispetto al feed; non sostituiscono una firma dell’editore. Non vengono installati prerelease o downgrade. Niente token GitHub, cookie dei servizi o telemetria. [Configurazione firma e pubblicazione](docs/UPDATES.md).
 
@@ -152,8 +156,8 @@ Compilare sul sistema di destinazione. GitHub Actions esegue automaticamente i c
 Per pubblicare gli installer creare e inviare un tag coerente con `package.json`:
 
 ```sh
-git tag v0.8.1
-git push origin v0.8.1
+git tag v0.9.0
+git push origin v0.9.0
 ```
 
 Il workflow pubblica una GitHub Release solo quando tutte e quattro le build riescono. Prepara i feed Windows/Linux/macOS con SHA-512 e unisce le architetture Mac. Carica tutti i file in una bozza e la pubblica solo al termine. Include `SHA256SUMS.txt`. Nessun workflow Pages è necessario.

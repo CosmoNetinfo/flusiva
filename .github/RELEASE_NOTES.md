@@ -1,26 +1,27 @@
-**Flusiva 0.8.1** aggiunge MP4 da Instagram e Facebook e foto dei post Instagram. Download sul dispositivo, senza server Flusiva. GPL-3.0-only.
+**Flusiva 0.9.0** corregge la verifica dei video Android e aggiunge gli aggiornamenti direttamente dall’app.
 
-### Instagram e Facebook
+### Video Instagram e Facebook
 
-* Video e Reel pubblici, con fonte riconosciuta e comando esplicito per MP4.
-* Link Instagram `share/...`, Facebook `share/v/`, `share/r/` e `fb.watch`, oltre ai link diretti.
-* Foto Instagram in JPEG, PNG o WebP senza ricompressione. Nei caroselli si sceglie una foto per download; le copertine video non sono presentate come foto.
-* Durata e codec mancanti non fanno scartare un video valido: le tracce MP4 e il limite di 6 ore vengono verificati sul file.
+* Il controllo dei file usa FFprobe incluso, indipendente dai codec del telefono. Gli MP4 validi con VP9 non vengono scartati perché Android non li riconosce.
+* Restano verificati integrità, durata massima di 6 ore e presenza della traccia richiesta. Errori distinti per file incompleto, durata e tracce.
+* Test con un MP4 VP9 sintetico e con file non validi.
 
-### Tempi Android
+### Aggiornamenti Android dall’app
 
-* Preparazione del motore in background all’apertura.
-* Riuso dell’analisi dello stesso contenuto per 90 secondi, per evitare una seconda estrazione all’avvio del download.
-* Fino a quattro frammenti paralleli per i flussi segmentati. Velocità effettiva dipendente da rete e piattaforma; nessuna percentuale di accelerazione dichiarata.
+* **Impostazioni → Controlla aggiornamenti → Scarica aggiornamento → Installa aggiornamento**.
+* Download con avanzamento e annullamento, gestito da Android anche quando la schermata è chiusa.
+* Verifica SHA-256, package, versione e stessa firma dell’app installata prima di aprire l’installer.
+* Controllo all’avvio una volta al giorno, disattivabile. Il download richiede il comando dell’utente e l’installazione richiede sempre conferma Android.
+* Durante un download di contenuti l’installazione viene rinviata.
+
+**Chi usa 0.8.1 o precedenti deve installare questo APK manualmente una sola volta**, perché le versioni precedenti aprivano soltanto le Release. Poi gli aggiornamenti successivi saranno gestibili dall’app.
 
 ### Installazione
 
-**Android 10+: Flusiva-0.8.1-android.apk**. APK universale ARM64, ARMv7 e x86_64, firmato con la stessa chiave: aggiornare senza disinstallare per conservare playlist e preferenze.
+**Android 10+: Flusiva-0.9.0-android.apk**. Stessa firma delle versioni precedenti: installare sopra l’app esistente, senza disinstallare, per conservare playlist e preferenze.
 
-Installer inclusi per Windows x64, Linux x64, Mac Intel e Apple Silicon. Windows/Linux mantengono gli aggiornamenti compatibili; su Mac non firmato il controllo apre il download manuale della Release.
+Inclusi anche gli installer Windows x64, Linux x64, Mac Intel e Apple Silicon. Su Mac non firmato resta il download manuale.
 
-Restano disponibili lettore musicale Android, playlist, equalizzatore, ascolto a schermo spento e download dalle altre cinque piattaforme. Spotify resta rimandato. I contenuti che richiedono login o abbonamenti non vengono sbloccati.
+Video Instagram/Facebook, foto Instagram originali, sette piattaforme, lettore musicale Android, playlist, equalizzatore e ascolto a schermo spento restano disponibili.
 
-**Verifiche online:** MP4 Instagram 720×1280, MP4 Facebook H.264 + AAC e foto Instagram 1080×1350 scaricati e verificati con FFprobe. Non è una garanzia per ogni link o rete. Usare contenuti propri o autorizzati.
-
-[Guida e piattaforme](https://github.com/CosmoNetinfo/flusiva/blob/main/docs/PLATFORMS.md) · [Guida Android](https://github.com/CosmoNetinfo/flusiva/blob/main/docs/ANDROID.md).
+[Guida Android](https://github.com/CosmoNetinfo/flusiva/blob/main/docs/ANDROID.md) · [Verifiche](https://github.com/CosmoNetinfo/flusiva/blob/main/docs/VALIDATION.md).

@@ -1,7 +1,6 @@
 package info.cosmonet.flusiva
 
 import android.content.Context
-import android.media.MediaMetadataRetriever
 import android.os.SystemClock
 import com.yausername.ffmpeg.FFmpeg
 import com.yausername.youtubedl_android.YoutubeDL
@@ -11,11 +10,13 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URI
 import java.security.MessageDigest
+import java.util.concurrent.TimeUnit
 
 data class MediaInfo(val url: String, val platform: String, val title: String, val author: String, val duration: Int, val hasVideo: Boolean, val hasAudio: Boolean, val sourceUrl: String = url, val photos: List<Photo> = emptyList())
 object Engine {
     private var initialized = false
     private var pluginsDirectory: String? = null
+    @Volatile private var verification: Process? = null
     private val inspected = RecentInspection<MediaInfo> { SystemClock.elapsedRealtime() }
     private fun remember(info: MediaInfo, json: String): MediaInfo { inspected.put(info, json); return info }
     const val PROCESS_ID = "flusiva-download"
@@ -124,17 +125,27 @@ object Engine {
         check(!cancelled()) { "Operazione annullata." }
         return File(directory, "media.$format").also {
             check(it.isFile && it.length() > 0) { "Il motore non ha prodotto il file richiesto." }
-            if (info.platform in listOf("Instagram", "Facebook")) verifyOutput(it, format)
+            if (info.platform in listOf("Instagram", "Facebook")) verifyOutput(context, it, format)
         }
     }
-    fun verifyOutput(file: File, format: String) {
-        val reader = MediaMetadataRetriever()
+    fun verifyOutput(context: Context, file: File, format: String) {
+        // Probe the container independently of the phone's hardware codecs.
+        val libraries = File(context.noBackupFilesDir, "youtubedl-android/packages/ffmpeg/usr/lib").path
+        val process = ProcessBuilder(File(context.applicationInfo.nativeLibraryDir, "libffprobe.so").path,
+            "-v", "error", "-show_entries", "format=duration:stream=codec_type", "-of", "json", file.path)
+            .redirectError(File("/dev/null")).apply { environment()["LD_LIBRARY_PATH"] = libraries }.start()
+        verification = process
         try {
-            reader.setDataSource(file.path)
-            val duration = reader.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
-            val key = if (format == "mp4") MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO else MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO
-            check(duration in 1L..21600000L && reader.extractMetadata(key) == "yes") { "Il file non contiene la traccia richiesta o supera la durata massima di 6 ore." }
-        } finally { reader.release() }
+            check(process.waitFor(30, TimeUnit.SECONDS)) { "La verifica del file ha impiegato troppo tempo. Riprova." }
+            check(process.exitValue() == 0) { "Il file scaricato è incompleto o non è leggibile. Riprova il download." }
+            val result = JSONObject(process.inputStream.bufferedReader().use { it.readText() })
+            val duration = result.optJSONObject("format")?.optDouble("duration", Double.NaN) ?: Double.NaN
+            check(duration.isFinite() && duration > 0) { "Non è possibile verificare la durata del file scaricato." }
+            check(duration <= 21600) { "Il contenuto supera la durata massima di 6 ore." }
+            val streams = result.optJSONArray("streams")
+            val required = if (format == "mp4") "video" else "audio"
+            check(streams != null && (0 until streams.length()).any { streams.getJSONObject(it).optString("codec_type") == required }) { "Il file scaricato non contiene la traccia $required richiesta." }
+        } finally { process.destroyForcibly(); if (verification === process) verification = null }
     }
-    fun cancel() { YoutubeDL.destroyProcessById(PROCESS_ID); InstagramPhotos.cancel() }
+    fun cancel() { YoutubeDL.destroyProcessById(PROCESS_ID); InstagramPhotos.cancel(); verification?.destroyForcibly() }
 }

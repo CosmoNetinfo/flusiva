@@ -34,7 +34,17 @@ Schermate reali della 0.8.1 su emulatore Android 15. Il pannello delle foto usa 
 
 <p><img src="images/android-instagram.png" alt="Link condiviso Instagram riconosciuto prima dell’analisi" width="280"> <img src="images/android-facebook.png" alt="Link Facebook riconosciuto con comando Scarica MP4 da Facebook" width="280"> <img src="images/android-photos.png" alt="Post fotografico di prova con scelta delle foto e download senza ricompressione" width="280"></p>
 
-## Lettore e playlist
+## Aggiornare dall’app — dalla 0.9
+
+Aprire **Impostazioni → Controlla aggiornamenti**. Se è disponibile una versione nuova, premere **Scarica aggiornamento**: Android gestisce il download anche fuori dalla schermata; l’app mostra avanzamento e comando Annulla. Completato il trasferimento, Flusiva verifica il checksum SHA-256 pubblicato dal repository ufficiale, il package, la versione e la corrispondenza della firma con l’app installata.
+
+Premere **Installa aggiornamento**. Al primo utilizzo Android può chiedere di consentire l’installazione da Flusiva: abilitare l’opzione di sistema, tornare all’app e premere di nuovo Installa. L’installazione richiede sempre la conferma di Android; non è silenziosa. Un download di contenuti in corso impedisce l’avvio dell’installazione. L’APK è condiviso con l’installer tramite un URI temporaneo del FileProvider limitato alla cartella degli aggiornamenti.
+
+Il controllo all’avvio è attivo inizialmente, al massimo una volta al giorno; si disattiva con **Cerca aggiornamenti all’avvio**. Non scarica automaticamente l’APK. Il download e la verifica non cancellano playlist, preferenze o file multimediali. Dopo un aggiornamento riuscito il vecchio APK viene eliminato dalla cartella dell’app.
+
+**Da 0.8.1 o precedenti occorre installare manualmente la 0.9 una sola volta**, perché il vecchio codice apriva soltanto le Release nel browser. Rimane disponibile il collegamento alla Release ufficiale come alternativa.
+
+## Lettore musicale e playlist
 
 Aprire **Musica** per ascoltare i file scaricati o importati, creare playlist persistenti e continuare l’ascolto in background. Le pagine **Lettore**, **Playlist** e **Audio** separano riproduzione, libreria e impostazioni audio. Include dati di qualità del file, decoder, equalizzatore del dispositivo e timer. [Guida del lettore musicale](MUSIC.md).
 

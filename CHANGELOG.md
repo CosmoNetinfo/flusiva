@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.0 — 2026-11-28
+
+* Android: verifica dei file MP4/MP3 Meta con FFprobe incluso, indipendente dai decoder del telefono. Corretto il rifiuto di MP4 VP9 validi; durata, traccia richiesta e integrità rimangono controllate, con errori distinti.
+* Aggiornamenti Android nelle Impostazioni: controllo, download con avanzamento e annullamento tramite DownloadManager, verifica e avvio dell’installazione di sistema. Download continua chiudendo la schermata e stato conservato dopo riapertura.
+* Controllo automatico all’avvio una volta al giorno, disattivabile; download e installazione richiedono il comando dell’utente. Verifica SHA-256, package, versione e stessa firma dell’app installata. FileProvider limitato alla cartella degli aggiornamenti; installazione rinviata durante i download dei contenuti.
+* Test per MP4 VP9 sintetico, tracce mancanti, file corrotto, APK reale, hash/versione/package errati, firma estranea e controlli della pagina aggiornamenti.
+
 ## 0.8.1 — 2026-11-28
 
 * Prima pubblicazione delle funzioni 0.8; nomi Instagram/Facebook visibili anche mentre gli elementi della coda attendono l’analisi. I download fotografici sono indicati come FOTO.

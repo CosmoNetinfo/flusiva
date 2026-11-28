@@ -43,8 +43,16 @@ class AndroidSmokeTest {
         val movie = File(context.cacheDir, "flusiva-test.mp4")
         val video = ProcessBuilder(File(native, "libffmpeg.so").path, "-hide_banner", "-y", "-f", "lavfi", "-i", "color=c=blue:s=128x128:r=10:d=1", "-i", sample.path, "-c:v", "mpeg4", "-c:a", "aac", "-shortest", movie.path).redirectErrorStream(true).apply { environment()["LD_LIBRARY_PATH"] = libraries }.start()
         val videoLog = video.inputStream.bufferedReader().readText(); assertEquals(videoLog, 0, video.waitFor())
-        Engine.verifyOutput(movie, "mp4")
-        assertTrue(runCatching { Engine.verifyOutput(sample, "mp4") }.isFailure)
+        Engine.verifyOutput(context, movie, "mp4")
+        assertTrue(runCatching { Engine.verifyOutput(context, sample, "mp4") }.isFailure)
+        val vp9 = File(context.cacheDir, "vp9-regression.mp4")
+        try {
+            instrumentation.context.assets.open("vp9-in-mp4.mp4").use { input -> vp9.outputStream().use { input.copyTo(it) } }
+            Engine.verifyOutput(context, vp9, "mp4")
+            assertTrue(runCatching { Engine.verifyOutput(context, vp9, "mp3") }.isFailure)
+            val invalid = File(context.cacheDir, "invalid-media.mp4").apply { writeText("not an MP4") }
+            try { assertTrue(runCatching { Engine.verifyOutput(context, invalid, "mp4") }.isFailure) } finally { invalid.delete() }
+        } finally { vp9.delete() }
         val retriever = MediaMetadataRetriever()
         try { retriever.setDataSource(movie.path); assertEquals("yes", retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO)); assertEquals("yes", retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO)) } finally { retriever.release() }
         val extracted = File(context.cacheDir, "flusiva-extracted.mp3")
@@ -67,7 +75,7 @@ class AndroidSmokeTest {
     @Test fun instagramPhotosCanBeChosenAndSavedAsImages() {
         val device = UiDevice.getInstance(instrumentation)
         device.wakeUp(); device.executeShellCommand("wm dismiss-keyguard")
-        Preferences(context).reset()
+        Preferences(context).apply { reset(); automaticUpdates = false }
         val url = "https://www.instagram.com/p/BqvsDleB3lV/"
         val raw = org.json.JSONObject("""{"id":"photo","entries":[{"flusiva_media_type":"image","thumbnails":[{"url":"https://scontent.cdninstagram.com/small.jpg","width":320,"height":320},{"url":"https://scontent.cdninstagram.com/original.jpg","width":1080,"height":1350}]},{"flusiva_media_type":"image","thumbnails":[{"url":"https://scontent.cdninstagram.com/second.jpg","width":1080,"height":1080}]},{"flusiva_media_type":"video","thumbnails":[{"url":"https://scontent.cdninstagram.com/poster.jpg"}]}]}""")
         val photos = InstagramPhotos.collect(raw)
@@ -90,14 +98,14 @@ class AndroidSmokeTest {
                 val saved = Downloads.save(context, file, "Foto di prova", "jpg") { false }
                 try { assertEquals("image/jpeg", context.contentResolver.getType(saved)); assertTrue(context.contentResolver.openInputStream(saved)!!.use { it.readBytes().isNotEmpty() }) } finally { context.contentResolver.delete(saved, null, null) }
             } finally { file.delete() }
-        } finally { instrumentation.runOnMainSync { DownloadState.set(DownloadSnapshot()) }; Preferences(context).reset() }
+        } finally { instrumentation.runOnMainSync { DownloadState.set(DownloadSnapshot()) }; Preferences(context).apply { reset(); automaticUpdates = false } }
     }
     @Test fun metaSharedLinksShowSourceAndMp4() {
         val device = UiDevice.getInstance(instrumentation)
         device.wakeUp(); device.executeShellCommand("wm dismiss-keyguard")
         try {
             for ((platform, url) in listOf("Instagram" to "https://www.instagram.com/share/BAWVJE-rtk", "Facebook" to "https://www.facebook.com/share/r/Abc123/")) {
-                Preferences(context).reset()
+                Preferences(context).apply { reset(); automaticUpdates = false }
                 instrumentation.runOnMainSync { DownloadState.set(DownloadSnapshot()) }
                 context.startActivity(Intent(context, MainActivity::class.java).setAction(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, "Guarda $url").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
                 assertNotNull(device.wait(Until.findObject(By.text("Fonte riconosciuta: $platform")), 10000))
@@ -113,11 +121,11 @@ class AndroidSmokeTest {
             assertNotNull(device.wait(Until.findObject(By.text("Scarica MP4 da Facebook").enabled(true)), 5000))
         } finally {
             instrumentation.runOnMainSync { DownloadState.set(DownloadSnapshot()) }
-            Preferences(context).reset()
+            Preferences(context).apply { reset(); automaticUpdates = false }
         }
     }
     @Test fun sharedLinkAndSettingsAreUsable() {
-        Preferences(context).reset()
+        Preferences(context).apply { reset(); automaticUpdates = false }
         val device = UiDevice.getInstance(instrumentation)
         device.wakeUp(); device.executeShellCommand("wm dismiss-keyguard")
         context.startActivity(Intent(context, MainActivity::class.java).setAction(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, "Guarda https://youtu.be/aqz-KE-bpKQ").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
@@ -142,6 +150,6 @@ class AndroidSmokeTest {
         while (Preferences(context).maximum && android.os.SystemClock.elapsedRealtime() < deadline) Thread.sleep(50)
         assertFalse(Preferences(context).maximum)
         capture(device, "android-settings.png")
-        Preferences(context).reset()
+        Preferences(context).apply { reset(); automaticUpdates = false }
     }
 }

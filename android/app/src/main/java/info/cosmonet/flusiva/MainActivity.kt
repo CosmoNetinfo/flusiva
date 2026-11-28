@@ -10,6 +10,9 @@ import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.provider.Settings
 import android.view.*
 import android.widget.*
 import android.text.Editable
@@ -17,10 +20,7 @@ import android.text.TextWatcher
 import androidx.activity.ComponentActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import java.net.HttpURLConnection
-import java.net.URI
 import java.util.concurrent.Executors
-import org.json.JSONObject
 
 class MainActivity : ComponentActivity() {
     private val blue = Color.rgb(23, 98, 244)
@@ -41,6 +41,15 @@ class MainActivity : ComponentActivity() {
     private lateinit var progress: ProgressBar
     private lateinit var formats: RadioGroup
     private lateinit var updateStatus: TextView
+    private lateinit var updateCheck: Button
+    private lateinit var updateDownload: Button
+    private lateinit var updateInstall: Button
+    private lateinit var updateCancel: Button
+    private lateinit var updateProgress: ProgressBar
+    private var settingsNavigation: Button? = null
+    private val updateObserver: (UpdateSnapshot) -> Unit = { renderUpdates(it) }
+    private val updateHandler = Handler(Looper.getMainLooper())
+    private val updatePoll = object : Runnable { override fun run() { if (settings) AndroidUpdates.refresh(applicationContext); updateHandler.postDelayed(this, 1000) } }
     private lateinit var source: TextView
     private lateinit var qualityHint: TextView
     private var settings = false
@@ -65,13 +74,14 @@ class MainActivity : ComponentActivity() {
     override fun onSaveInstanceState(outState: Bundle) { if (!settings) draft = link.text.toString(); outState.putString("link", draft); outState.putString("format", selectedFormat); super.onSaveInstanceState(outState) }
     override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); setIntent(intent); receive(intent) }
     private fun receive(intent: Intent?) {
+        if (intent?.getBooleanExtra("updates", false) == true) { showPage(true); return }
         if (intent?.action == Intent.ACTION_SEND && intent.type == "text/plain") {
             val shared = MediaPolicy.sharedLink(intent.getStringExtra(Intent.EXTRA_TEXT).orEmpty())
             showPage(false); draft = shared; link.setText(shared)
         }
     }
-    override fun onResume() { super.onResume(); DownloadState.observers.add(observer); if (!settings) render(DownloadState.value) }
-    override fun onPause() { DownloadState.observers.remove(observer); super.onPause() }
+    override fun onResume() { super.onResume(); DownloadState.observers.add(observer); AndroidUpdates.observers.add(updateObserver); if (!settings) render(DownloadState.value); renderUpdates(AndroidUpdates.value); AndroidUpdates.attach(applicationContext); updateHandler.post(updatePoll) }
+    override fun onPause() { DownloadState.observers.remove(observer); AndroidUpdates.observers.remove(updateObserver); updateHandler.removeCallbacks(updatePoll); super.onPause() }
     override fun onDestroy() { network.shutdown(); super.onDestroy() }
     private fun showPage(showSettings: Boolean) {
         if (::link.isInitialized && !settings) draft = link.text.toString()
@@ -81,7 +91,8 @@ class MainActivity : ComponentActivity() {
         val bar = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL; setPadding(dp(22), dp(10), dp(22), dp(10)) }
         bar.addView(ImageView(this).apply { setImageResource(R.drawable.ic_flusiva); contentDescription = "Flusiva" }, LinearLayout.LayoutParams(dp(40), dp(40)))
         bar.addView(text("Flusiva", 24f, true), LinearLayout.LayoutParams(0, -2, 1f))
-        bar.addView(button(if (settings) "← Download" else "Impostazioni") { showPage(!settings) }.apply { layoutParams = LinearLayout.LayoutParams(-2, dp(50)) })
+        settingsNavigation = button(if (settings) "← Download" else "Impostazioni") { showPage(!settings) }.apply { layoutParams = LinearLayout.LayoutParams(-2, dp(50)) }
+        bar.addView(settingsNavigation)
         root.addView(bar)
         if (!settings) {
             val navigation = LinearLayout(this).apply { setPadding(dp(20), 0, dp(20), dp(8)) }
@@ -93,6 +104,7 @@ class MainActivity : ComponentActivity() {
         content = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(24), dp(8), dp(24), dp(32)); layoutParams = ViewGroup.LayoutParams(-1, -2) }
         scroll.addView(content); root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f)); setContentView(root)
         if (settings) settingsPage() else downloadPage()
+        renderUpdates(AndroidUpdates.value)
         root.requestFocus()
         root.requestApplyInsets()
     }
@@ -199,31 +211,52 @@ class MainActivity : ComponentActivity() {
         choice("Formato predefinito", listOf("Video MP4", "Audio MP3"), listOf("mp4", "mp3"), prefs.format) { prefs.format = it; selectedFormat = it }
         choice("Bitrate MP3", listOf("128 kbps", "192 kbps", "256 kbps", "320 kbps"), listOf("128", "192", "256", "320"), prefs.audio, !prefs.maximum) { prefs.audio = it }
         choice("Risoluzione massima", listOf("Migliore disponibile", "2160p", "1080p", "720p", "480p"), listOf("best", "2160", "1080", "720", "480"), prefs.video, !prefs.maximum) { prefs.video = it }
-        val updates = card(); updates.addView(text("Aggiornamenti", 21f, true)); updates.addView(text("Flusiva ${BuildConfig.VERSION_NAME} · Android\nControlla le nuove versioni e scarica l’APK dalla Release ufficiale. Android richiede la conferma per installarlo.", 13f))
+        val updates = card(); updates.addView(text("Aggiornamenti", 21f, true)); updates.addView(text("Flusiva ${BuildConfig.VERSION_NAME} · Android\nScarica e installa la nuova versione da qui. Android richiede la tua conferma per installarla; playlist e preferenze rimangono.", 13f))
+        updates.addView(Switch(this).apply { text = "Cerca aggiornamenti all’avvio"; isChecked = prefs.automaticUpdates; minHeight = dp(48); setOnCheckedChangeListener { _, enabled -> prefs.automaticUpdates = enabled } })
         updateStatus = text(""); updates.addView(updateStatus)
-        updates.addView(button("Controlla aggiornamenti") { checkUpdates() })
+        updateProgress = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply { max = 100 }; updates.addView(updateProgress, LinearLayout.LayoutParams(-1, dp(8)))
+        updateCheck = button("Controlla aggiornamenti") { AndroidUpdates.check(applicationContext) }; updates.addView(updateCheck)
+        updateDownload = button("Scarica aggiornamento", true) { AndroidUpdates.download(applicationContext) }; updates.addView(updateDownload)
+        updateInstall = button("Installa aggiornamento", true) { installUpdate() }; updates.addView(updateInstall)
+        updateCancel = button("Annulla download aggiornamento") { AndroidUpdates.cancel(applicationContext) }; updates.addView(updateCancel)
         updates.addView(button("Apri Release ufficiale") { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/CosmoNetinfo/flusiva/releases/latest"))) })
+        renderUpdates(AndroidUpdates.value)
         val about = card(); about.addView(text("Sul tuo telefono", 21f, true)); about.addView(text("Download e conversione avvengono qui. I file restano in Download/Flusiva anche dopo la disinstallazione. Nessun database, pubblicità o telemetria.\n\nYouTube, TikTok, Instagram, Facebook, Vimeo, Dailymotion e SoundCloud. Spotify non è supportato.", 14f))
         about.addView(button("Uso responsabile e licenze") { val message = assets.open("NOTICE.txt").bufferedReader().use { it.readText() }; AlertDialog.Builder(this).setTitle("Flusiva · GPL v3").setMessage(message).setPositiveButton("Chiudi", null).show() })
         about.addView(button("Ripristina preferenze") { prefs.reset(); selectedFormat = prefs.format; showPage(true) })
     }
-    private fun checkUpdates() {
-        updateStatus.text = "Controllo della Release ufficiale…"
-        network.execute {
-            val message = runCatching {
-                val connection = URI("https://api.github.com/repos/CosmoNetinfo/flusiva/releases/latest").toURL().openConnection() as HttpURLConnection
-                try {
-                    connection.connectTimeout = 15000; connection.readTimeout = 15000; connection.setRequestProperty("Accept", "application/vnd.github+json")
-                    check(connection.responseCode == 200) { "Controllo non disponibile. Riprova più tardi." }
-                    val release = JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
-                    val version = release.getString("tag_name").removePrefix("v")
-                    check(Regex("\\d+\\.\\d+\\.\\d+").matches(version) && !release.getBoolean("prerelease") && !release.getBoolean("draft"))
-                    val current = BuildConfig.VERSION_NAME.split('.').map(String::toInt); val latest = version.split('.').map(String::toInt)
-                    val newer = (0..2).firstOrNull { latest[it] != current[it] }?.let { latest[it] > current[it] } ?: false
-                    if (newer) "È disponibile Flusiva $version. Apri la Release per scaricare l’APK." else "Flusiva ${BuildConfig.VERSION_NAME} è aggiornata."
-                } finally { connection.disconnect() }
-            }.getOrElse { MediaPolicy.friendly(it) }
-            runOnUiThread { if (!isDestroyed && settings) updateStatus.text = message }
+    private fun renderUpdates(state: UpdateSnapshot) {
+        if (!settings) { settingsNavigation?.text = if (state.release != null) "Impostazioni •" else "Impostazioni"; return }
+        if (!::updateStatus.isInitialized || !::updateCheck.isInitialized) return
+        MobileUi.text(updateStatus, state.message)
+        val busy = state.status in listOf("checking", "downloading", "verifying")
+        updateCheck.isEnabled = !busy
+        MobileUi.text(updateDownload, if (state.status == "downloaded") "Verifica aggiornamento" else "Scarica aggiornamento")
+        updateDownload.visibility = if (state.release != null && !busy && state.status != "ready") View.VISIBLE else View.GONE
+        updateInstall.visibility = if (state.status == "ready") View.VISIBLE else View.GONE
+        updateInstall.isEnabled = !DownloadState.value.busy
+        updateCancel.visibility = if (state.status == "downloading") View.VISIBLE else View.GONE
+        updateProgress.visibility = if (busy) View.VISIBLE else View.GONE
+        updateProgress.isIndeterminate = state.percent == null
+        updateProgress.progress = state.percent ?: 0
+    }
+    private fun installUpdate() {
+        if (DownloadState.value.busy) { updateStatus.text = "Attendi la fine del download in corso prima di installare."; return }
+        if (!packageManager.canRequestPackageInstalls()) {
+            updateStatus.text = "Consenti a Flusiva di installare aggiornamenti, poi torna qui e premi Installa aggiornamento."
+            try { startActivity(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:$packageName"))) }
+            catch (_: ActivityNotFoundException) { updateStatus.text = "Apri le impostazioni Android e consenti l’installazione da Flusiva." }
+            return
+        }
+        updateInstall.isEnabled = false
+        updateStatus.text = "Verifica dell’aggiornamento prima dell’installazione…"
+        AndroidUpdates.prepareInstall(applicationContext) { intent, error ->
+            if (!isDestroyed && settings) {
+                updateInstall.isEnabled = true
+                if (intent == null) updateStatus.text = error
+                else try { startActivity(intent) } catch (_: ActivityNotFoundException) { updateStatus.text = "Installazione non disponibile. Puoi usare la Release ufficiale." }
+            }
         }
     }
+
 }

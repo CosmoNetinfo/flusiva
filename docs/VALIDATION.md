@@ -1,5 +1,12 @@
 # Verifiche della prima versione
 
+## Verifica MP4 e aggiornamenti Android — 0.9.0
+
+* Il Reel segnalato nello screenshot è stato scaricato completamente su Windows: MP4 da 1.367.597 byte, VP9 (`vp09`) 1916×1078 con audio HE-AAC, durata circa 15.071 secondi. FFprobe lo riconosce correttamente. Il controllo Android precedente dipendeva da MediaMetadataRetriever e poteva rifiutare un contenitore valido se il telefono non ne riconosceva il codec; ora usa FFprobe incluso e distingue file incompleto, durata non verificabile, limite superato e traccia assente.
+* Fixture VP9 sintetica inclusa soltanto nell’APK dei test: il Reel dell’utente non è distribuito. Le prove su emulatore verificano accettazione MP4 VP9, rifiuto come file audio, rifiuto di un MP4 corrotto e mantenimento dei controlli della durata.
+* Aggiornamento APK: test JVM di versioni stabili, ordinamento numerico e checksum non ambiguo. Test Android con l’APK reale installato, hash/versione/package errati e un APK senza codice con stessa identità/versione ma firma estranea. FileProvider confinato alla cartella degli aggiornamenti. Prova UI della disponibilità del download e dell’assenza del comando Installa prima della verifica.
+* Il trasferimento dell’APK usa DownloadManager e la sua notifica di sistema, con ID persistente e ripresa dello stato alla riapertura. L’installazione resta una conferma Android esplicita. Non viene dichiarata una prova di sostituzione completa dell’app su un telefono fisico in questa sessione.
+
 ## Instagram, Facebook e foto — 0.8.1
 
 * 48 test Node riusciti: link diretti/condivisi, rifiuto di host ingannevoli, redirect nella stessa piattaforma, metadati Meta incompleti, controllo del file MP4 e pulizia in caso di durata o tracce non valide. Test foto per scelta del candidato maggiore, distinzione da copertine video, URL CDN, contenuto immagine, limite di dimensione e annullamento.
